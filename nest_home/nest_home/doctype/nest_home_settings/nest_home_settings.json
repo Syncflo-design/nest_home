@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "creation": "2026-05-20 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "app_title", "greeting", "default_landing", "allow_user_override",
+  "branding_section", "brand_logo",
+  "lists_section", "role_lists_help", "role_lists"
+ ],
+ "fields": [
+  {"fieldname": "app_title", "fieldtype": "Data", "label": "Landing Title", "default": "Nest Home", "description": "Heading shown at the top of the landing page."},
+  {"fieldname": "greeting", "fieldtype": "Data", "label": "Greeting (optional)", "description": "Optional welcome line, e.g. 'Here's what needs you today.'"},
+  {"fieldname": "default_landing", "fieldtype": "Select", "label": "App Default Landing", "options": "Nest Home\nCRM Mobile\nMy Activities\nStandard Desk", "default": "Nest Home", "description": "Fallback landing when neither a per-user preference nor a role default applies."},
+  {"fieldname": "allow_user_override", "fieldtype": "Check", "label": "Allow users to override their landing page", "default": "1"},
+  {"fieldname": "branding_section", "fieldtype": "Section Break", "label": "Branding"},
+  {"fieldname": "brand_logo", "fieldtype": "Attach Image", "label": "Brand Logo", "description": "Used if set; otherwise nest_theme's customer logo is used."},
+  {"fieldname": "lists_section", "fieldtype": "Section Break", "label": "Attention Lists per Role"},
+  {"fieldname": "role_lists_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Map each role to the attention lists it should see. If a role is not listed here, managers default to A+B+C and everyone else to List A.</p>"},
+  {"fieldname": "role_lists", "fieldtype": "Table", "label": "Role Lists", "options": "Nest Home Role List"}
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-20 00:00:00.000000",
+ "module": "Nest Home",
+ "name": "Nest Home Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "email": 1, "share": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -1,0 +1,50 @@
+[
+ {
+  "doctype": "Nest Home Tile", "name": "NEST-TILE-0001", "naming_series": "NEST-TILE-.####",
+  "label": "New Sales Order", "icon": "fa fa-file-text-o", "route": "/app/sales-order/new",
+  "color": "#1F4E79", "description": "Capture a sales order", "sort_order": 10, "enabled": 1,
+  "allowed_roles": [
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Sales User"},
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Sales Manager"}
+  ]
+ },
+ {
+  "doctype": "Nest Home Tile", "name": "NEST-TILE-0002", "naming_series": "NEST-TILE-.####",
+  "label": "New Quotation", "icon": "fa fa-files-o", "route": "/app/quotation/new",
+  "color": "#2E75B6", "description": "Draft a quotation", "sort_order": 20, "enabled": 1,
+  "allowed_roles": [
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Sales User"},
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Sales Manager"}
+  ]
+ },
+ {
+  "doctype": "Nest Home Tile", "name": "NEST-TILE-0003", "naming_series": "NEST-TILE-.####",
+  "label": "New Purchase Order", "icon": "fa fa-shopping-cart", "route": "/app/purchase-order/new",
+  "color": "#1D6F42", "description": "Raise a purchase order", "sort_order": 30, "enabled": 1,
+  "allowed_roles": [
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Purchase User"},
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Purchase Manager"}
+  ]
+ },
+ {
+  "doctype": "Nest Home Tile", "name": "NEST-TILE-0004", "naming_series": "NEST-TILE-.####",
+  "label": "Stock Entry", "icon": "fa fa-cubes", "route": "/app/stock-entry/new",
+  "color": "#B45309", "description": "Move or adjust stock", "sort_order": 40, "enabled": 1,
+  "allowed_roles": [
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Stock User"},
+   {"doctype": "Nest Home Tile Role", "parentfield": "allowed_roles", "parenttype": "Nest Home Tile", "role": "Stock Manager"}
+  ]
+ },
+ {
+  "doctype": "Nest Home Tile", "name": "NEST-TILE-0005", "naming_series": "NEST-TILE-.####",
+  "label": "My To-Dos", "icon": "fa fa-check-square-o", "route": "/app/todo",
+  "color": "#6b85a3", "description": "Your full task list", "sort_order": 50, "enabled": 1,
+  "allowed_roles": []
+ },
+ {
+  "doctype": "Nest Home Tile", "name": "NEST-TILE-0006", "naming_series": "NEST-TILE-.####",
+  "label": "Dashboards", "icon": "fa fa-bar-chart", "route": "/app/dashboard",
+  "color": "#82a085", "description": "Open when you choose to", "sort_order": 60, "enabled": 1,
+  "allowed_roles": []
+ }
+]

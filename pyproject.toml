@@ -1,0 +1,15 @@
+[project]
+name = "nest_home"
+authors = [{ name = "Syncflo", email = "ops@syncflo.co.za" }]
+description = "NestERP role-based, branded landing page — push-not-pull attention engine (My Activities, Awaiting My Action, Waiting On Others) + data-driven quick-launch tiles."
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = []
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "nest_home"

@@ -1,0 +1,25 @@
+[
+ {
+  "doctype": "Custom Field",
+  "name": "User-nest_home_section",
+  "dt": "User",
+  "fieldname": "nest_home_section",
+  "label": "Nest Home",
+  "fieldtype": "Section Break",
+  "insert_after": "desk_theme",
+  "collapsible": 1,
+  "module": "Nest Home"
+ },
+ {
+  "doctype": "Custom Field",
+  "name": "User-preferred_landing_page",
+  "dt": "User",
+  "fieldname": "preferred_landing_page",
+  "label": "Preferred Landing Page",
+  "fieldtype": "Select",
+  "options": "\nNest Home\nCRM Mobile\nMy Activities\nStandard Desk",
+  "description": "Where you land after login. Blank uses your role default. Honoured only if the administrator allows overrides (Nest Home Settings).",
+  "insert_after": "nest_home_section",
+  "module": "Nest Home"
+ }
+]

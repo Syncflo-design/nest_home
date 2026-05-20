@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-05-20 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series", "label", "enabled", "column_break_1", "icon", "icon_image", "color",
+  "route_section", "route", "description",
+  "roles_section", "allowed_roles", "sort_order"
+ ],
+ "fields": [
+  {"fieldname": "naming_series", "fieldtype": "Select", "label": "Series", "options": "NEST-TILE-.####", "default": "NEST-TILE-.####", "hidden": 1, "no_copy": 1, "print_hide": 1},
+  {"fieldname": "label", "fieldtype": "Data", "label": "Label", "reqd": 1, "in_list_view": 1, "description": "Text shown on the tile."},
+  {"fieldname": "enabled", "fieldtype": "Check", "label": "Enabled", "default": "1", "in_list_view": 1},
+  {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+  {"fieldname": "icon", "fieldtype": "Data", "label": "Icon (class or emoji)", "default": "octicon octicon-rocket", "description": "Font Awesome (e.g. 'fa fa-cart-plus') or Octicon class, or an emoji. Ignored if an Icon Image is uploaded."},
+  {"fieldname": "icon_image", "fieldtype": "Attach Image", "label": "Icon Image", "description": "Optional. Upload a logo/image to use as the tile icon. Takes precedence over the icon class."},
+  {"fieldname": "color", "fieldtype": "Data", "label": "Accent Colour", "description": "Optional hex (e.g. #1F4E79). Defaults to the theme primary."},
+  {"fieldname": "route_section", "fieldtype": "Section Break", "label": "Target"},
+  {"fieldname": "route", "fieldtype": "Data", "label": "Target Route", "reqd": 1, "in_list_view": 1, "description": "Desk route the tile opens, e.g. '/app/sales-order/new', '/app/crm-mobile', or '/app/sales-order'."},
+  {"fieldname": "description", "fieldtype": "Small Text", "label": "Description", "description": "Optional sub-label shown under the tile title."},
+  {"fieldname": "roles_section", "fieldtype": "Section Break", "label": "Visibility & Order"},
+  {"fieldname": "allowed_roles", "fieldtype": "Table", "label": "Allowed Roles", "options": "Nest Home Tile Role", "description": "Leave empty to show the tile to everyone."},
+  {"fieldname": "sort_order", "fieldtype": "Int", "label": "Sort Order", "default": "10", "in_list_view": 1}
+ ],
+ "links": [],
+ "modified": "2026-05-20 00:00:00.000000",
+ "module": "Nest Home",
+ "name": "Nest Home Tile",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "email": 1, "share": 1},
+  {"role": "All", "read": 1}
+ ],
+ "sort_field": "sort_order",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

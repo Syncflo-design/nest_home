@@ -1,0 +1,23 @@
+{
+ "actions": [],
+ "creation": "2026-05-20 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": ["role", "show_list_a", "show_list_b", "show_list_c"],
+ "fields": [
+  {"fieldname": "role", "fieldtype": "Link", "in_list_view": 1, "label": "Role", "options": "Role", "reqd": 1, "columns": 4},
+  {"fieldname": "show_list_a", "fieldtype": "Check", "in_list_view": 1, "label": "List A (My Activities)", "default": "1", "columns": 2},
+  {"fieldname": "show_list_b", "fieldtype": "Check", "in_list_view": 1, "label": "List B (Awaiting My Action)", "columns": 2},
+  {"fieldname": "show_list_c", "fieldtype": "Check", "in_list_view": 1, "label": "List C (Waiting On Others)", "columns": 2}
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-05-20 00:00:00.000000",
+ "module": "Nest Home",
+ "name": "Nest Home Role List",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
