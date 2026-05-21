@@ -237,6 +237,14 @@ def _logo_url():
     return None
 
 
+def _show_nest_credit(s):
+    """Show the NestERP credit unless an admin has explicitly turned it off."""
+    if not s:
+        return True
+    val = getattr(s, "show_nest_credit", None)
+    return True if val is None else bool(val)
+
+
 # ---------------------------------------------------------------------------
 # Whitelisted endpoints
 # ---------------------------------------------------------------------------
@@ -294,4 +302,5 @@ def get_landing_context():
         "tiles": tiles_for_user(user),
         "greeting": greeting,
         "has_layout": layout is not None,
+        "show_nest_credit": _show_nest_credit(s),
     }

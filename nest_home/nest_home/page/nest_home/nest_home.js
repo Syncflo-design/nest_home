@@ -113,6 +113,16 @@ class NestHome {
 			'</div>'
 		].join('\n');
 		this.$main.html(shell);
+
+		// Co-branding footer: subtle 'Powered by NestERP'. Hidden until the
+		// landing context confirms the credit should show (white-label toggle).
+		$('.nh-app', this.$main).append([
+			'<div class="nh-footer" id="nh-footer" style="display:none;">',
+			'  <span class="nh-powered">Powered by</span>',
+			'  <img class="nh-nest-logo" src="/assets/nest_home/images/nesterp_logo.svg" alt="NestERP">',
+			'  <span class="nh-nest-name">NestERP</span>',
+			'</div>'
+		].join('\n'));
 	}
 
 	bind_events() {
@@ -173,6 +183,7 @@ class NestHome {
 	render_header(ctx) {
 		var esc = frappe.utils.escape_html;
 		$('#nh-title').text(ctx.app_title || 'Nest Home');
+		if (ctx.show_nest_credit !== false) $('#nh-footer').show();
 		var greet = ctx.greeting || ('Welcome back, ' + (ctx.user_fullname || '') + '.');
 		$('#nh-greeting').text(greet);
 

@@ -4,19 +4,72 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "app_title", "greeting", "default_landing", "allow_user_override",
-  "branding_section", "brand_logo",
-  "layouts_section", "layouts_help"
+  "app_title",
+  "greeting",
+  "default_landing",
+  "allow_user_override",
+  "branding_section",
+  "brand_logo",
+  "show_nest_credit",
+  "layouts_section",
+  "layouts_help"
  ],
  "fields": [
-  {"fieldname": "app_title", "fieldtype": "Data", "label": "Landing Title", "default": "Nest Home", "description": "Heading shown at the top of the landing page."},
-  {"fieldname": "greeting", "fieldtype": "Data", "label": "Greeting (optional)", "description": "Default welcome line. A layout can override this for its users."},
-  {"fieldname": "default_landing", "fieldtype": "Select", "label": "App Default Landing", "options": "Standard Desk\nNest Home\nCRM Mobile\nMy Activities", "default": "Standard Desk", "description": "Where users with NO matching layout land. Leave on 'Standard Desk' so only people with a layout are sent to Nest Home."},
-  {"fieldname": "allow_user_override", "fieldtype": "Check", "label": "Allow users to override their landing page", "default": "1"},
-  {"fieldname": "branding_section", "fieldtype": "Section Break", "label": "Branding"},
-  {"fieldname": "brand_logo", "fieldtype": "Attach Image", "label": "Brand Logo", "description": "Used if set; otherwise nest_theme's customer logo is used."},
-  {"fieldname": "layouts_section", "fieldtype": "Section Break", "label": "Role-based Views"},
-  {"fieldname": "layouts_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Which lists and buttons each role sees is configured under <b>Nest Home Layout</b> (one entry per role or role profile). A user is sent to Nest Home only when a layout matches them.</p>"}
+  {
+   "fieldname": "app_title",
+   "fieldtype": "Data",
+   "label": "Landing Title",
+   "default": "Nest Home",
+   "description": "Heading shown at the top of the landing page."
+  },
+  {
+   "fieldname": "greeting",
+   "fieldtype": "Data",
+   "label": "Greeting (optional)",
+   "description": "Default welcome line. A layout can override this for its users."
+  },
+  {
+   "fieldname": "default_landing",
+   "fieldtype": "Select",
+   "label": "App Default Landing",
+   "options": "Standard Desk\nNest Home\nCRM Mobile\nMy Activities",
+   "default": "Standard Desk",
+   "description": "Where users with NO matching layout land. Leave on 'Standard Desk' so only people with a layout are sent to Nest Home."
+  },
+  {
+   "fieldname": "allow_user_override",
+   "fieldtype": "Check",
+   "label": "Allow users to override their landing page",
+   "default": "1"
+  },
+  {
+   "fieldname": "branding_section",
+   "fieldtype": "Section Break",
+   "label": "Branding"
+  },
+  {
+   "fieldname": "brand_logo",
+   "fieldtype": "Attach Image",
+   "label": "Brand Logo",
+   "description": "Used if set; otherwise nest_theme's customer logo is used."
+  },
+  {
+   "fieldname": "layouts_section",
+   "fieldtype": "Section Break",
+   "label": "Role-based Views"
+  },
+  {
+   "fieldname": "layouts_help",
+   "fieldtype": "HTML",
+   "options": "<p class='text-muted'>Which lists and buttons each role sees is configured under <b>Nest Home Layout</b> (one entry per role or role profile). A user is sent to Nest Home only when a layout matches them.</p>"
+  },
+  {
+   "fieldname": "show_nest_credit",
+   "fieldtype": "Check",
+   "label": "Show 'Powered by NestERP' credit",
+   "default": "1",
+   "description": "Untick to hide the NestERP credit for a fully white-labelled landing page."
+  }
  ],
  "issingle": 1,
  "links": [],
@@ -25,7 +78,16 @@
  "name": "Nest Home Settings",
  "owner": "Administrator",
  "permissions": [
-  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "email": 1, "share": 1}
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1
+  }
  ],
  "sort_field": "modified",
  "sort_order": "DESC"
