@@ -78,3 +78,25 @@ role_home_page still covers managers. Record the answer here after smoke test.
   Sales Order / Purchase Order / Work Order. Each still gated by submit perm, so
   users only see what they can act on.
 - BUILD_MARKER → `v0.0.2-2026-05-20-list-a-parties`; `__version__` → 0.0.2.
+
+## v0.0.6 — 2026-05-21 (staged, deploy pending)
+
+- **Scripted role-profile views** (`defaults.py::ensure_layout_for_profile`): one
+  idempotent call creates/updates the Nest Home Layout for a Role Profile and
+  wires its buttons. Tiles are given as existing names/labels (reused) or dicts
+  (`label`+`route` required) which are created in the shared library via
+  `_ensure_tile` (matched by label, so re-runs never duplicate). `replace_tiles`
+  rewrites vs. appends; `lists` picks A/B/C. New `_resolve_tile_spec` does the
+  name/label/dict → tile-name resolution.
+- **Admin entrypoint** (`api.py::build_profile_view`): `@frappe.whitelist()`,
+  `frappe.only_for("System Manager")`, JSON-coerces `tiles`/`lists`, returns a
+  truthy payload (gotcha 2026-05-13). Lets a view be compiled from console/patch/
+  tool call without a code deploy.
+- No page-bundle change, so BUILD_MARKER is unchanged; `__version__` → 0.0.6.
+- Resolution model confirmed as the intended **hybrid**: Role Profile match wins,
+  then Role, else fall through to `Nest Home Settings.default_landing` (Standard
+  Desk) — see `api.py::resolve_layout` + `boot.py::_resolve_landing`.
+- Data (live, via MCP, not in this repo): created PreSales layout (Role Profile =
+  PreSales) with tiles CRM/Leads/Customers/New Sales Invoice/New Supplier Invoice
+  (`NEST-TILE-0007..0011`); fixed the `NEST-TILE-` series counter (was stuck at 1
+  → set to 6) so future tile inserts don't collide.

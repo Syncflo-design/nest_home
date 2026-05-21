@@ -305,3 +305,32 @@ def get_landing_context():
         "show_nest_credit": _show_nest_credit(s),
         "support_link": (getattr(s, "support_link", None) if s else None) or "",
     }
+
+
+@frappe.whitelist()
+def build_profile_view(role_profile, tiles, lists=None, greeting=None, priority=0):
+    """Admin-only: create/update a Role Profile's Nest Home Layout in one call.
+
+    Thin wrapper over nest_home.defaults.ensure_layout_for_profile so a view can
+    be compiled from a console, a patch, or a tool call without a code deploy.
+    `tiles` and `lists` may arrive as JSON strings (frappe.call serialises lists).
+    Returns a truthy payload (CoWork gotcha 2026-05-13)."""
+    frappe.only_for("System Manager")
+    from nest_home.defaults import ensure_layout_for_profile
+
+    def _maybe_json(v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except Exception:
+                return v
+        return v
+
+    tiles = _maybe_json(tiles) or []
+    lists = _maybe_json(lists) or ["A", "B", "C"]
+    kwargs = {"tiles": tiles, "lists": lists, "priority": int(priority or 0)}
+    if greeting:
+        kwargs["greeting"] = greeting
+
+    name = ensure_layout_for_profile(role_profile, **kwargs)
+    return {"ok": True, "layout": name}
