@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.4-2026-05-21-redirect-cobrand';
+	var BUILD_MARKER = 'v0.0.5-2026-05-21-home-button';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the

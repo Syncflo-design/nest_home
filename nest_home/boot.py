@@ -81,6 +81,9 @@ def boot_session(bootinfo):
         landing = _resolve_landing(frappe.session.user)
         if landing:
             bootinfo["nest_home_landing"] = landing
+            # Make the desk Home/house button land here too (it normally
+            # points at the default workspace).
+            bootinfo["home_page"] = landing
     except Exception:
         pass
 

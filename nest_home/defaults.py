@@ -57,6 +57,11 @@ def _ensure_tile(label, route, icon, color, sort_order):
         "route": route,
         "sort_order": sort_order,
     })
+    # Use an explicit, deterministic name and bypass the naming series. The
+    # fixture buttons (NEST-TILE-0001..) were imported with fixed names without
+    # advancing the series counter, so a series-named insert would collide.
+    doc.name = "NEST-TILE-WS-" + frappe.scrub(label).upper()
+    doc.flags.name_set = True
     doc.insert(ignore_permissions=True)
     return doc.name
 
