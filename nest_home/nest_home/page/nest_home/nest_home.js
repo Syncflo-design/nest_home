@@ -2,6 +2,10 @@
 // Built as a desk Page (not listview hooks) per CoWork_Helper gotchas
 // 2026-05-11. Mounts inside page.body (jQuery in v16) per 2026-05-10.
 // HTML is assembled as string arrays joined with "\n" (page-bundle rule).
+//
+// v0.0.3 layout: buttons sit in a narrow left column (2 wide); the attention
+// lists spread across the rest of the screen as columns. Each list row shows
+// only the company/lead name + due date — the rest is one click away.
 
 frappe.pages['nest-home'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
@@ -10,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.1-2026-05-20-img-icons';
+	var BUILD_MARKER = 'v0.0.3-2026-05-21-horizontal-layout';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -40,6 +44,20 @@ var NH_LIST_META = {
 	C: { title: 'Waiting On Others',  sub: 'Chase these',  dot: 'nh-dot-C',
 	     empty_title: 'Nothing outstanding', empty_msg: "No one owes you anything right now." }
 };
+
+// Due-date rendering for a condensed row. Returns formatted text + overdue flag.
+function nh_due(it) {
+	if (!it || !it.date) return { text: '', over: false };
+	var txt = it.date;
+	try { txt = frappe.datetime.str_to_user(it.date); } catch (e) {}
+	var over = false;
+	try {
+		var d = new Date(it.date);
+		var today = new Date(); today.setHours(0, 0, 0, 0);
+		over = d && !isNaN(d.getTime()) && d < today;
+	} catch (e) {}
+	return { text: txt, over: over };
+}
 
 class NestHome {
 
@@ -82,12 +100,16 @@ class NestHome {
 			'      <div class="nh-date" id="nh-date"></div>',
 			'    </div>',
 			'  </div>',
-			'  <div id="nh-tiles-wrap" style="display:none;">',
-			'    <div class="nh-section-label">Quick launch</div>',
-			'    <div class="nh-tiles" id="nh-tiles"></div>',
+			'  <div class="nh-body">',
+			'    <div class="nh-left" id="nh-left" style="display:none;">',
+			'      <div class="nh-section-label">Quick launch</div>',
+			'      <div class="nh-tiles" id="nh-tiles"></div>',
+			'    </div>',
+			'    <div class="nh-right">',
+			'      <div class="nh-section-label">Needs your attention</div>',
+			'      <div class="nh-lists" id="nh-lists"></div>',
+			'    </div>',
 			'  </div>',
-			'  <div class="nh-section-label">Needs your attention</div>',
-			'  <div class="nh-lists" id="nh-lists"></div>',
 			'</div>'
 		].join('\n');
 		this.$main.html(shell);
@@ -164,23 +186,23 @@ class NestHome {
 	}
 
 	render_tiles(tiles) {
-		if (!tiles || !tiles.length) { $('#nh-tiles-wrap').hide(); return; }
+		// No buttons → hide the left column entirely so the lists take the full
+		// width of the screen.
+		if (!tiles || !tiles.length) { $('#nh-left').hide(); return; }
 		var esc = frappe.utils.escape_html;
 		var html = tiles.map(function(t) {
 			var accent = t.color ? (' style="--nh-tile-accent:' + esc(t.color) + ';"') : '';
 			var icon = nh_tile_icon(t);
 			var icon_cls = t.icon_image ? 'nh-tile-icon nh-tile-icon-img' : 'nh-tile-icon';
-			var desc = t.description ? '<div class="nh-tile-desc">' + esc(t.description) + '</div>' : '';
 			return [
 				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '">',
 				'  <div class="' + icon_cls + '">' + icon + '</div>',
 				'  <div class="nh-tile-label">' + esc(t.label || '') + '</div>',
-				desc,
 				'</div>'
 			].join('\n');
 		}).join('\n');
 		$('#nh-tiles').html(html);
-		$('#nh-tiles-wrap').show();
+		$('#nh-left').show();
 
 		// An uploaded image (icon_image) wins; then a URL/path in `icon`; then a
 		// Font Awesome / Octicon class; otherwise treat `icon` as emoji / text.
@@ -246,44 +268,21 @@ class NestHome {
 		$body.html(rows);
 	}
 
+	// Condensed row: company/lead name on the left, due date on the right.
+	// Everything else (priority, amount, description, status) is one click away.
 	item_html(it) {
 		var esc = frappe.utils.escape_html;
 		var route = encodeURIComponent(JSON.stringify(it.deep_link || []));
-
-		var age = (it.age_days != null)
-			? (it.age_days === 0 ? 'today' : it.age_days + 'd')
-			: '';
-		var age_html = age ? '<span class="nh-age">' + esc(age) + '</span>' : '';
-
-		var pri_html = it.priority
-			? '<span class="nh-pill nh-pill-' + esc(it.priority) + '">' + esc(it.priority) + '</span>'
-			: '';
-
-		// Right-hand value: amount for List B, else the priority pill.
-		var right_extra = '';
-		if (it.meta && it.meta.amount) {
-			var amt;
-			if (it.meta.currency) {
-				amt = format_currency(it.meta.amount, it.meta.currency);
-			} else {
-				amt = 'Qty ' + (Number(it.meta.amount) || it.meta.amount);
-			}
-			right_extra = '<span class="nh-amount">' + esc(amt) + '</span>';
-		}
-
-		var sub = it.subtitle ? '<div class="nh-item-sub">' + esc(it.subtitle) + '</div>' : '';
+		var main = it.owner_or_party || it.title || '(untitled)';
+		var due = nh_due(it);
+		var due_html = due.text
+			? '<span class="nh-due' + (due.over ? ' nh-due-over' : '') + '">' + esc(due.text) + '</span>'
+			: '<span class="nh-due nh-due-none">No date</span>';
 
 		return [
 			'<div class="nh-item" data-route="' + route + '">',
-			'  <div class="nh-item-main">',
-			'    <div class="nh-item-title">' + esc(it.title || '') + '</div>',
-			sub,
-			'  </div>',
-			'  <div class="nh-item-right">',
-			age_html,
-			pri_html,
-			right_extra,
-			'  </div>',
+			'  <div class="nh-item-main"><div class="nh-item-title">' + esc(main) + '</div></div>',
+			'  <div class="nh-item-right">' + due_html + '</div>',
 			'</div>'
 		].join('\n');
 	}

@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:layout_name",
+ "creation": "2026-05-21 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "layout_name", "enabled", "priority", "cb_top",
+  "applies_to", "role_profile", "role",
+  "lists_section", "lists_help", "show_list_a", "show_list_b", "show_list_c",
+  "greeting_section", "greeting",
+  "tiles_section", "tiles_help", "tiles"
+ ],
+ "fields": [
+  {"fieldname": "layout_name", "fieldtype": "Data", "label": "Layout Name", "reqd": 1, "unique": 1, "in_list_view": 1, "description": "A friendly name, e.g. 'Presales' or 'Sales Manager'."},
+  {"fieldname": "enabled", "fieldtype": "Check", "label": "Enabled", "default": "1", "in_list_view": 1},
+  {"fieldname": "priority", "fieldtype": "Int", "label": "Priority", "default": "0", "description": "When a user matches more than one layout, the highest priority wins."},
+  {"fieldname": "cb_top", "fieldtype": "Column Break"},
+  {"fieldname": "applies_to", "fieldtype": "Select", "label": "Applies To", "options": "Role\nRole Profile", "default": "Role", "reqd": 1, "in_list_view": 1, "description": "Attach this layout to a single Role, or to a whole Role Profile."},
+  {"fieldname": "role", "fieldtype": "Link", "label": "Role", "options": "Role", "depends_on": "eval:doc.applies_to=='Role'", "mandatory_depends_on": "eval:doc.applies_to=='Role'", "in_list_view": 1},
+  {"fieldname": "role_profile", "fieldtype": "Link", "label": "Role Profile", "options": "Role Profile", "depends_on": "eval:doc.applies_to=='Role Profile'", "mandatory_depends_on": "eval:doc.applies_to=='Role Profile'", "in_list_view": 1},
+  {"fieldname": "lists_section", "fieldtype": "Section Break", "label": "Lists Shown"},
+  {"fieldname": "lists_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Tick which attention lists this layout shows.</p>"},
+  {"fieldname": "show_list_a", "fieldtype": "Check", "label": "My Activities (List A)", "default": "1"},
+  {"fieldname": "show_list_b", "fieldtype": "Check", "label": "Awaiting My Action (List B)", "default": "0"},
+  {"fieldname": "show_list_c", "fieldtype": "Check", "label": "Waiting On Others (List C)", "default": "0"},
+  {"fieldname": "greeting_section", "fieldtype": "Section Break", "label": "Greeting"},
+  {"fieldname": "greeting", "fieldtype": "Data", "label": "Greeting (optional)", "description": "Optional welcome line for this layout. Falls back to the global greeting if blank."},
+  {"fieldname": "tiles_section", "fieldtype": "Section Break", "label": "Quick-launch Buttons"},
+  {"fieldname": "tiles_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Pick buttons from the shared library and drag to reorder. Define buttons under 'Nest Home Tile'.</p>"},
+  {"fieldname": "tiles", "fieldtype": "Table", "label": "Buttons", "options": "Nest Home Layout Tile"}
+ ],
+ "links": [],
+ "modified": "2026-05-21 00:00:00.000000",
+ "module": "Nest Home",
+ "name": "Nest Home Layout",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "print": 1, "email": 1, "share": 1, "report": 1, "export": 1}
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

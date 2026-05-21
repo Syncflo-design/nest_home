@@ -63,3 +63,18 @@ role_home_page still covers managers. Record the answer here after smoke test.
 - GitHub: `Syncflo-design/nest_home` (org for NestERP apps)
 - Site: `Syncflo_internal_V16` — route `/desk/nest-home`
 - Module: `Nest Home`
+
+## v0.0.2 — 2026-05-20 (staged, deploy pending)
+
+- **List A/C party enrichment** (`attention/sources/todos.py`): Lead/Customer-
+  linked ToDos now resolve to the party's real name (Lead → "name — company",
+  Customer → customer_name) and the row deep-links to the **Party Activity Hub**
+  (`party-activity/<type>/<name>`) if nest_crm_tasks is installed, else the
+  Lead/Customer record. One batched lookup per doctype, run as the session user
+  (names resolve only if readable). Driven by presales need: My Activities tied
+  to leads + customers is the primary signal.
+- **List B rules expanded** (`attention/sources/awaiting.py` `AWAITING_RULES`):
+  added **Supplier Invoice (Purchase Invoice)** and **Quotation** alongside
+  Sales Order / Purchase Order / Work Order. Each still gated by submit perm, so
+  users only see what they can act on.
+- BUILD_MARKER → `v0.0.2-2026-05-20-list-a-parties`; `__version__` → 0.0.2.

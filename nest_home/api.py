@@ -7,6 +7,13 @@ Design promises honoured here:
   * Every whitelisted method returns a TRUTHY payload, so the client-side
     success branch (`if (r.message)`) always fires. See CoWork_Helper gotcha
     2026-05-13 (whitelisted-action-needs-return-value).
+
+Role-based views (v0.0.3): a "Nest Home Layout" record decides which lists and
+which quick-launch buttons a user sees. Resolution order:
+    1. a layout attached to the user's Role Profile
+    2. a layout attached to one of the user's Roles
+    3. no layout  -> sensible defaults (managers A+B+C, everyone else A)
+Highest `priority` wins inside each step.
 """
 
 import json
@@ -14,8 +21,8 @@ import frappe
 
 from nest_home.attention.sources import todos, awaiting
 
-# Roles that see the full A+B+C management board when Settings has no explicit
-# per-role mapping. Everyone else defaults to List A only.
+# Roles that see the full A+B+C management board when NO layout matches the
+# user. Everyone else defaults to List A only.
 _DEFAULT_MANAGER_ROLES = {
     "System Manager", "Sales Manager", "Purchase Manager",
     "Stock Manager", "Manufacturing Manager", "Accounts Manager",
@@ -53,35 +60,166 @@ def _user_roles(user):
     return set(frappe.get_roles(user))
 
 
-def lists_for_user(user=None):
-    """Which categories this user's roles should see — union across roles.
-    Reads Nest Home Settings.role_lists child table if configured; otherwise
-    falls back to: manager roles → A+B+C, everyone else → A."""
+def _user_role_profiles(user):
+    """Role profiles assigned to the user. Handles both the long-standing single
+    field (role_profile_name) and, defensively, a multi-profile child table if
+    the site has one. Never raises."""
+    profiles = set()
+    try:
+        udoc = frappe.get_cached_doc("User", user)
+    except Exception:
+        return profiles
+    rp = getattr(udoc, "role_profile_name", None)
+    if rp:
+        profiles.add(rp)
+    # Newer Frappe allows multiple role profiles via a child table; the row
+    # fieldname has varied across versions, so probe a couple defensively.
+    try:
+        for row in (udoc.get("role_profiles") or []):
+            val = getattr(row, "role_profile", None) or getattr(row, "role_profile_name", None)
+            if val:
+                profiles.add(val)
+    except Exception:
+        pass
+    return profiles
+
+
+def _pick_layout(filters):
+    """Return the highest-priority enabled layout matching filters, or None."""
+    try:
+        rows = frappe.get_all(
+            "Nest Home Layout",
+            filters=filters,
+            fields=["name", "priority"],
+            order_by="priority desc, modified desc",
+            limit_page_length=1,
+        )
+    except Exception:
+        return None
+    if not rows:
+        return None
+    try:
+        return frappe.get_cached_doc("Nest Home Layout", rows[0]["name"])
+    except Exception:
+        return None
+
+
+def resolve_layout(user=None):
+    """The single source of truth for 'which layout does this user get?'.
+    Role Profile match wins over Role match. Returns a Layout doc or None."""
     user = user or frappe.session.user
+    if not user or user == "Guest":
+        return None
+
+    profiles = _user_role_profiles(user)
+    if profiles:
+        layout = _pick_layout({
+            "enabled": 1,
+            "applies_to": "Role Profile",
+            "role_profile": ["in", list(profiles)],
+        })
+        if layout:
+            return layout
+
     roles = _user_roles(user)
-    s = _settings()
+    if roles:
+        layout = _pick_layout({
+            "enabled": 1,
+            "applies_to": "Role",
+            "role": ["in", list(roles)],
+        })
+        if layout:
+            return layout
+    return None
 
-    mapped = set()
-    has_config = False
-    if s and getattr(s, "role_lists", None):
-        for row in s.role_lists:
-            if row.role in roles:
-                has_config = True
-                if getattr(row, "show_list_a", 0):
-                    mapped.add("A")
-                if getattr(row, "show_list_b", 0):
-                    mapped.add("B")
-                if getattr(row, "show_list_c", 0):
-                    mapped.add("C")
 
-    if has_config:
-        # Preserve canonical A,B,C order
+def user_has_layout(user=None):
+    """Cheap boolean used by the landing redirect."""
+    return resolve_layout(user) is not None
+
+
+def lists_for_user(user=None):
+    """Which categories this user should see. A matching layout decides;
+    otherwise managers default to A+B+C and everyone else to List A."""
+    user = user or frappe.session.user
+    layout = resolve_layout(user)
+    if layout:
+        mapped = set()
+        if getattr(layout, "show_list_a", 0):
+            mapped.add("A")
+        if getattr(layout, "show_list_b", 0):
+            mapped.add("B")
+        if getattr(layout, "show_list_c", 0):
+            mapped.add("C")
         return [c for c in _VALID_CATEGORIES if c in mapped] or ["A"]
 
-    # No explicit config for any of this user's roles → sensible defaults.
-    if roles & _DEFAULT_MANAGER_ROLES:
+    # No layout -> sensible defaults.
+    if _user_roles(user) & _DEFAULT_MANAGER_ROLES:
         return ["A", "B", "C"]
     return ["A"]
+
+
+def _tile_payload(doc):
+    return {
+        "label": doc.label,
+        "icon": doc.icon or "octicon octicon-rocket",
+        "icon_image": getattr(doc, "icon_image", None) or "",
+        "route": doc.route or "",
+        "color": getattr(doc, "color", None) or "",
+        "description": getattr(doc, "description", None) or "",
+        "sort_order": doc.sort_order or 0,
+    }
+
+
+def _layout_tiles(layout):
+    """Buttons chosen on the layout, in the admin's drag order. Skips buttons
+    that have been disabled in the shared library."""
+    out = []
+    for row in (layout.get("tiles") or []):
+        name = getattr(row, "tile", None)
+        if not name:
+            continue
+        try:
+            doc = frappe.get_cached_doc("Nest Home Tile", name)
+        except Exception:
+            continue
+        if not getattr(doc, "enabled", 1):
+            continue
+        out.append(_tile_payload(doc))
+    return out
+
+
+def _default_tiles(roles):
+    """Fallback when no layout: enabled library tiles filtered by allowed_roles
+    (no allowed_roles = visible to all), sorted."""
+    out = []
+    try:
+        names = frappe.get_all(
+            "Nest Home Tile",
+            filters={"enabled": 1},
+            pluck="name",
+            order_by="sort_order asc, label asc",
+            limit_page_length=200,
+        )
+    except Exception:
+        return out
+    for name in names:
+        doc = frappe.get_cached_doc("Nest Home Tile", name)
+        allowed_roles = [r.role for r in (doc.get("allowed_roles") or [])]
+        if allowed_roles and not (set(allowed_roles) & roles):
+            continue
+        out.append(_tile_payload(doc))
+    return out
+
+
+def tiles_for_user(user=None):
+    """Buttons for this user: the layout's chosen buttons if a layout matches,
+    otherwise the role-filtered library default."""
+    user = user or frappe.session.user
+    layout = resolve_layout(user)
+    if layout:
+        return _layout_tiles(layout)
+    return _default_tiles(_user_roles(user))
 
 
 def _logo_url():
@@ -129,51 +267,31 @@ def get_attention(categories=None, limit_per=20):
 
 @frappe.whitelist()
 def get_tiles():
-    """Role-aware quick-launch tiles. Returns enabled Nest Home Tile records the
-    user is allowed to see (no allowed_roles = visible to all), sorted."""
-    user = frappe.session.user
-    roles = _user_roles(user)
-    out = []
-    try:
-        names = frappe.get_all(
-            "Nest Home Tile",
-            filters={"enabled": 1},
-            pluck="name",
-            order_by="sort_order asc, label asc",
-            limit_page_length=200,
-        )
-    except Exception:
-        return {"tiles": []}
-
-    for name in names:
-        doc = frappe.get_cached_doc("Nest Home Tile", name)
-        allowed_roles = [r.role for r in (doc.get("allowed_roles") or [])]
-        if allowed_roles and not (set(allowed_roles) & roles):
-            continue
-        out.append({
-            "label": doc.label,
-            "icon": doc.icon or "octicon octicon-rocket",
-            "icon_image": getattr(doc, "icon_image", None) or "",
-            "route": doc.route or "",
-            "color": getattr(doc, "color", None) or "",
-            "description": getattr(doc, "description", None) or "",
-            "sort_order": doc.sort_order or 0,
-        })
-    return {"tiles": out}
+    """Role/layout-aware quick-launch buttons for the current user."""
+    return {"tiles": tiles_for_user(frappe.session.user)}
 
 
 @frappe.whitelist()
 def get_landing_context():
-    """One call the page makes on load: config + tiles, so the shell can paint
+    """One call the page makes on load: config + buttons, so the shell can paint
     before the attention lists arrive. Always truthy."""
     user = frappe.session.user
     s = _settings()
+    layout = resolve_layout(user)
+
+    greeting = ""
+    if layout and getattr(layout, "greeting", None):
+        greeting = layout.greeting
+    elif s and getattr(s, "greeting", None):
+        greeting = s.greeting
+
     return {
         "user": user,
         "user_fullname": frappe.utils.get_fullname(user),
         "allowed_lists": lists_for_user(user),
         "logo_url": _logo_url(),
         "app_title": (getattr(s, "app_title", None) if s else None) or "Nest Home",
-        "tiles": get_tiles().get("tiles", []),
-        "greeting": (getattr(s, "greeting", None) if s else None) or "",
+        "tiles": tiles_for_user(user),
+        "greeting": greeting,
+        "has_layout": layout is not None,
     }

@@ -7,36 +7,42 @@ app_license     = "MIT"
 app_icon        = "octicon octicon-home"
 
 # ---------------------------------------------------------------------------
-# Landing-page resolution (push, not pull).
+# Landing-page resolution (push, not pull) — v0.0.3 is layout-driven.
 #
-# Order of precedence honoured by nest_home.boot.get_user_home_page:
+# A user is redirected to nest-home ONLY when a Nest Home Layout matches their
+# Role Profile or one of their Roles. Order of precedence honoured by
+# nest_home.boot.get_user_home_page:
 #   1. the user's own "Preferred Landing Page" (if overrides are allowed)
-#   2. their role default (role_home_page below)
-#   3. the app default from Nest Home Settings
+#   2. nest-home, but ONLY if a layout matches them
+#   3. the app default from Nest Home Settings (defaults to the standard desk)
 #
-# role_home_page is also declared so the framework still has a sensible answer
-# if the per-user hook is ever bypassed. Per-user *workspace* overrides are NOT
-# attempted — that API is blocked for admins acting on other users (see
-# CoWork_Helper gotchas/2026-05-07-frappe-workspace-per-user-api-blocked.md).
+# role_home_page is intentionally EMPTY: redirecting by role alone would send
+# users to nest-home even with no layout configured, which contradicts the
+# "only if a layout exists" rule. The dynamic hook below is the single
+# authority. Per-user *workspace* overrides are NOT attempted — that API is
+# blocked for admins acting on other users (see CoWork_Helper gotchas
+# 2026-05-07-frappe-workspace-per-user-api-blocked.md).
 # ---------------------------------------------------------------------------
-role_home_page = {
-    "System Manager":        "nest-home",
-    "Sales Manager":         "nest-home",
-    "Purchase Manager":      "nest-home",
-    "Stock Manager":         "nest-home",
-    "Manufacturing Manager": "nest-home",
-    "Accounts Manager":      "nest-home",
-}
+role_home_page = {}
 
 # Resolves the final landing page per user. Returning None lets the framework
-# fall through to role_home_page. (This hook is consulted in get_home_page.)
+# fall through to the standard desk. (This hook is consulted in get_home_page.)
 get_website_user_home_page = "nest_home.boot.get_user_home_page"
 
 # On login, bust the per-user home_page cache so the resolver re-runs.
 on_session_creation = "nest_home.boot.on_session_creation"
 
+# Seed the default 'Administrator' (System Manager) layout on install and on
+# every migrate. Idempotent — see nest_home.defaults.ensure_admin_layout.
+after_install = "nest_home.defaults.ensure_admin_layout"
+after_migrate = "nest_home.defaults.ensure_admin_layout"
+
 # ---------------------------------------------------------------------------
 # Fixtures shipped with the app.
+#
+# Nest Home Layout records are deliberately NOT fixtured: they are site-specific
+# config the admin creates, and shipping them would overwrite local layouts on
+# migrate. Only the seed buttons and the User custom fields travel with the app.
 # ---------------------------------------------------------------------------
 fixtures = [
     {

@@ -1,5 +1,6 @@
 /* nest_home landing page — aligns to nest_theme palette tokens (var fallbacks
-   keep it sane if nest_theme is not installed). Professional, card-driven. */
+   keep it sane if nest_theme is not installed). Professional, card-driven.
+   v0.0.3: horizontal layout — narrow left button column, lists fill the rest. */
 
 .nh-app {
   --nh-card:    var(--card-bg, #ffffff);
@@ -10,7 +11,7 @@
   --nh-accent:  var(--accent-color, #82a085);
   --nh-bg:      var(--bg-color, #f5f6f8);
   --nh-radius:  12px;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 4px 4px 48px;
   color: var(--nh-text);
@@ -42,21 +43,27 @@
 .nh-clock { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .nh-date { font-size: 12px; opacity: 0.9; margin-top: 2px; }
 
-/* ---- Quick-launch tiles ------------------------------------------------- */
+/* ---- Horizontal body: left button column + right lists ------------------ */
+.nh-body { display: flex; gap: 22px; align-items: flex-start; }
+.nh-left  { flex: 0 0 304px; max-width: 304px; min-width: 0; }
+.nh-right { flex: 1 1 auto; min-width: 0; }
+
 .nh-section-label {
   font-size: 12px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1px; color: var(--nh-muted); margin: 6px 4px 12px;
 }
+
+/* ---- Quick-launch buttons (2 wide, stacking in rows) -------------------- */
 .nh-tiles {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px; margin-bottom: 30px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
 }
 .nh-tile {
   background: var(--nh-card); border: 1px solid var(--nh-border);
-  border-radius: var(--nh-radius); padding: 18px 16px; cursor: pointer;
+  border-radius: var(--nh-radius); padding: 14px 12px; cursor: pointer;
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
   border-top: 3px solid var(--nh-tile-accent, var(--nh-primary));
+  min-height: 84px;
 }
 .nh-tile:hover {
   transform: translateY(-3px);
@@ -64,15 +71,16 @@
   border-color: var(--nh-tile-accent, var(--nh-primary));
 }
 .nh-tile-icon {
-  font-size: 24px; color: var(--nh-tile-accent, var(--nh-primary)); line-height: 1;
+  font-size: 22px; color: var(--nh-tile-accent, var(--nh-primary)); line-height: 1;
 }
-.nh-tile-icon img { height: 26px; width: auto; }
-.nh-tile-label { font-size: 15px; font-weight: 650; }
-.nh-tile-desc { font-size: 12px; color: var(--nh-muted); line-height: 1.4; }
+.nh-tile-icon img { height: 24px; width: auto; }
+.nh-tile-label { font-size: 14px; font-weight: 650; line-height: 1.25; }
+.nh-tile-icon-img { line-height: 0; }
+.nh-tile-icon-img img { height: 34px; width: auto; max-width: 100%; border-radius: 6px; object-fit: contain; }
 
-/* ---- Attention lists ---------------------------------------------------- */
+/* ---- Attention lists (columns across the screen) ------------------------ */
 .nh-lists {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 18px; align-items: start;
 }
 .nh-list {
@@ -97,11 +105,11 @@
   display: inline-flex; align-items: center; justify-content: center;
 }
 .nh-count.nh-zero { background: var(--nh-border); color: var(--nh-muted); }
-.nh-list-body { padding: 8px; max-height: 560px; overflow-y: auto; }
+.nh-list-body { padding: 6px; max-height: 620px; overflow-y: auto; }
 
-/* item rows */
+/* condensed item rows: name + due date only */
 .nh-item {
-  display: flex; gap: 12px; align-items: flex-start;
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
   padding: 11px 12px; border-radius: 9px; cursor: pointer;
   transition: background .12s ease;
 }
@@ -110,19 +118,15 @@
 .nh-item-main { flex: 1; min-width: 0; }
 .nh-item-title {
   font-size: 14px; font-weight: 600; line-height: 1.35;
-  overflow-wrap: anywhere;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.nh-item-sub { font-size: 12px; color: var(--nh-muted); margin-top: 3px; overflow-wrap: anywhere; }
-.nh-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
-.nh-age { font-size: 11px; color: var(--nh-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.nh-pill {
-  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
-  text-transform: uppercase; letter-spacing: .4px; white-space: nowrap;
+.nh-item-right { display: flex; align-items: center; flex-shrink: 0; }
+.nh-due {
+  font-size: 12px; font-weight: 600; color: var(--nh-muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.nh-pill-High { background: rgba(176,126,126,0.18); color: var(--error-color, #b07e7e); }
-.nh-pill-Medium { background: rgba(196,163,115,0.20); color: var(--warning-color, #b45309); }
-.nh-pill-Low { background: rgba(130,160,133,0.18); color: var(--nh-accent); }
-.nh-amount { font-size: 12px; font-weight: 650; color: var(--nh-text); white-space: nowrap; }
+.nh-due-over { color: var(--error-color, #b07e7e); font-weight: 700; }
+.nh-due-none { color: var(--nh-border); font-weight: 500; }
 
 /* loading + empty states */
 .nh-loading { padding: 34px; text-align: center; color: var(--nh-muted); font-size: 13px; }
@@ -139,12 +143,14 @@
 .nh-empty-msg { font-size: 12px; }
 .nh-error { padding: 22px; color: var(--error-color, #b07e7e); font-size: 13px; }
 
+/* ---- Responsive: stack the columns on narrow screens -------------------- */
+@media (max-width: 900px) {
+  .nh-body { flex-direction: column; }
+  .nh-left { flex-basis: auto; max-width: none; width: 100%; }
+  .nh-tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .nh-lists { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
   .nh-header { flex-direction: column; align-items: flex-start; }
   .nh-header-right { text-align: left; }
-  .nh-lists { grid-template-columns: 1fr; }
 }
-
-/* Image (uploaded) tile icons */
-.nh-tile-icon-img { line-height: 0; }
-.nh-tile-icon-img img { height: 40px; width: auto; max-width: 100%; border-radius: 6px; object-fit: contain; }

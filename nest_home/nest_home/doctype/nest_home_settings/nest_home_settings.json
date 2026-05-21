@@ -6,22 +6,21 @@
  "field_order": [
   "app_title", "greeting", "default_landing", "allow_user_override",
   "branding_section", "brand_logo",
-  "lists_section", "role_lists_help", "role_lists"
+  "layouts_section", "layouts_help"
  ],
  "fields": [
   {"fieldname": "app_title", "fieldtype": "Data", "label": "Landing Title", "default": "Nest Home", "description": "Heading shown at the top of the landing page."},
-  {"fieldname": "greeting", "fieldtype": "Data", "label": "Greeting (optional)", "description": "Optional welcome line, e.g. 'Here's what needs you today.'"},
-  {"fieldname": "default_landing", "fieldtype": "Select", "label": "App Default Landing", "options": "Nest Home\nCRM Mobile\nMy Activities\nStandard Desk", "default": "Nest Home", "description": "Fallback landing when neither a per-user preference nor a role default applies."},
+  {"fieldname": "greeting", "fieldtype": "Data", "label": "Greeting (optional)", "description": "Default welcome line. A layout can override this for its users."},
+  {"fieldname": "default_landing", "fieldtype": "Select", "label": "App Default Landing", "options": "Standard Desk\nNest Home\nCRM Mobile\nMy Activities", "default": "Standard Desk", "description": "Where users with NO matching layout land. Leave on 'Standard Desk' so only people with a layout are sent to Nest Home."},
   {"fieldname": "allow_user_override", "fieldtype": "Check", "label": "Allow users to override their landing page", "default": "1"},
   {"fieldname": "branding_section", "fieldtype": "Section Break", "label": "Branding"},
   {"fieldname": "brand_logo", "fieldtype": "Attach Image", "label": "Brand Logo", "description": "Used if set; otherwise nest_theme's customer logo is used."},
-  {"fieldname": "lists_section", "fieldtype": "Section Break", "label": "Attention Lists per Role"},
-  {"fieldname": "role_lists_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Map each role to the attention lists it should see. If a role is not listed here, managers default to A+B+C and everyone else to List A.</p>"},
-  {"fieldname": "role_lists", "fieldtype": "Table", "label": "Role Lists", "options": "Nest Home Role List"}
+  {"fieldname": "layouts_section", "fieldtype": "Section Break", "label": "Role-based Views"},
+  {"fieldname": "layouts_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Which lists and buttons each role sees is configured under <b>Nest Home Layout</b> (one entry per role or role profile). A user is sent to Nest Home only when a layout matches them.</p>"}
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-05-20 00:00:00.000000",
+ "modified": "2026-05-21 00:00:00.000000",
  "module": "Nest Home",
  "name": "Nest Home Settings",
  "owner": "Administrator",

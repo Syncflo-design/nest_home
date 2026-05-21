@@ -1,16 +1,18 @@
 """Per-user landing-page resolution for nest_home.
 
 The product principle is "push, not pull": when a user logs in, the page that
-already shows their work should be the front door. This module decides which
-page that is, honouring the precedence chain:
+already shows their work should be the front door. As of v0.0.3 the redirect to
+nest-home is gated on the user actually having a Nest Home Layout that matches
+their Role Profile or Role -- if they don't, they are left on the standard desk.
 
+Precedence:
     1. the user's own Preferred Landing Page  (if overrides are allowed)
-    2. their role default                      (hooks.role_home_page)
+    2. nest-home                               (ONLY if a layout matches them)
     3. the app default                         (Nest Home Settings.default_landing)
 
 get_user_home_page is wired as the get_website_user_home_page hook; despite the
 name it is consulted in Frappe's get_home_page() resolution. Returning None lets
-the framework fall through to role_home_page.
+the framework fall through to the standard desk.
 """
 
 import frappe
@@ -22,17 +24,6 @@ LANDING_ROUTES = {
     "CRM Mobile":    "crm-mobile",
     "My Activities": "my-activities",
     "Standard Desk": "",
-}
-
-# Mirrors hooks.role_home_page. Kept here so step 2 of the chain can run inside
-# this single resolver (which wins over the framework's own role lookup).
-_ROLE_HOME = {
-    "System Manager":        "nest-home",
-    "Sales Manager":         "nest-home",
-    "Purchase Manager":      "nest-home",
-    "Stock Manager":         "nest-home",
-    "Manufacturing Manager": "nest-home",
-    "Accounts Manager":      "nest-home",
 }
 
 
@@ -57,25 +48,27 @@ def _resolve_landing(user):
 
     s = _settings()
     allow_override = bool(getattr(s, "allow_user_override", 1)) if s else True
-    default_label = (getattr(s, "default_landing", None) if s else None) or "Nest Home"
+    default_label = (getattr(s, "default_landing", None) if s else None) or "Standard Desk"
 
-    # 1. user preference
+    # 1. explicit user preference always wins (including a deliberate "Standard
+    #    Desk" choice, which means "leave me on the desk").
     if allow_override:
         try:
             pref = frappe.db.get_value("User", user, "preferred_landing_page")
         except Exception:
             pref = None
         if pref:
-            # An explicit "Standard Desk" choice means "leave me on the desk".
             return _route_for_label(pref)
 
-    # 2. role default
-    roles = set(frappe.get_roles(user))
-    for role, route in _ROLE_HOME.items():
-        if role in roles:
-            return route
+    # 2. nest-home, but ONLY if a layout actually matches this user.
+    try:
+        from nest_home.api import user_has_layout
+        if user_has_layout(user):
+            return "nest-home"
+    except Exception:
+        pass
 
-    # 3. app default
+    # 3. app-wide fallback for users with no layout (defaults to standard desk).
     return _route_for_label(default_label)
 
 
@@ -90,11 +83,11 @@ def get_user_home_page(user):
 
 def on_session_creation(login_manager=None):
     """Bust the per-user home_page cache on login so the resolver re-runs (e.g.
-    after the user changes their preference or after a deploy)."""
+    after the user changes their preference, gets a new layout, or after a
+    deploy)."""
     try:
         user = frappe.session.user
         cache = frappe.cache()
-        # Frappe caches the resolved home page per user under this hash key.
         cache.hdel("home_page", user)
     except Exception:
         pass
