@@ -303,4 +303,5 @@ def get_landing_context():
         "greeting": greeting,
         "has_layout": layout is not None,
         "show_nest_credit": _show_nest_credit(s),
+        "support_link": (getattr(s, "support_link", None) if s else None) or "",
     }

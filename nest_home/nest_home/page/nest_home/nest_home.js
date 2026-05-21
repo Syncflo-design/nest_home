@@ -96,8 +96,11 @@ class NestHome {
 			'      </div>',
 			'    </div>',
 			'    <div class="nh-header-right">',
-			'      <div class="nh-clock" id="nh-clock"></div>',
-			'      <div class="nh-date" id="nh-date"></div>',
+			'      <div class="nh-clockwrap">',
+			'        <div class="nh-clock" id="nh-clock"></div>',
+			'        <div class="nh-date" id="nh-date"></div>',
+			'      </div>',
+			'      <img class="nh-header-nest" id="nh-header-nest" src="/assets/nest_home/images/nesterp_logo.svg" alt="NestERP" title="NestERP" style="display:none;">',
 			'    </div>',
 			'  </div>',
 			'  <div class="nh-body">',
@@ -121,6 +124,8 @@ class NestHome {
 			'  <span class="nh-powered">Powered by</span>',
 			'  <img class="nh-nest-logo" src="/assets/nest_home/images/nesterp_logo.svg" alt="NestERP">',
 			'  <span class="nh-nest-name">NestERP</span>',
+			'  <span class="nh-foot-sep" id="nh-foot-sep" style="display:none;">&middot;</span>',
+			'  <a class="nh-support" id="nh-support" style="display:none;"></a>',
 			'</div>'
 		].join('\n'));
 	}
@@ -183,7 +188,17 @@ class NestHome {
 	render_header(ctx) {
 		var esc = frappe.utils.escape_html;
 		$('#nh-title').text(ctx.app_title || 'Nest Home');
-		if (ctx.show_nest_credit !== false) $('#nh-footer').show();
+		if (ctx.show_nest_credit !== false) {
+			$('#nh-footer').show();
+			$('#nh-header-nest').show();
+		}
+		if (ctx.support_link) {
+			var sl = String(ctx.support_link).trim();
+			var href = (/@/.test(sl) && !/:\/\//.test(sl)) ? ('mailto:' + sl) : sl;
+			$('#nh-support').attr('href', href).text('Contact support');
+			$('#nh-foot-sep').show();
+			$('#nh-support').show();
+		}
 		var greet = ctx.greeting || ('Welcome back, ' + (ctx.user_fullname || '') + '.');
 		$('#nh-greeting').text(greet);
 

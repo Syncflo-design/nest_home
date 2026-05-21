@@ -11,6 +11,7 @@
   "branding_section",
   "brand_logo",
   "show_nest_credit",
+  "support_link",
   "layouts_section",
   "layouts_help"
  ],
@@ -69,6 +70,12 @@
    "label": "Show 'Powered by NestERP' credit",
    "default": "1",
    "description": "Untick to hide the NestERP credit for a fully white-labelled landing page."
+  },
+  {
+   "fieldname": "support_link",
+   "fieldtype": "Data",
+   "label": "Support Link / Email",
+   "description": "Shown as a 'Contact support' link in the footer. An email becomes a mailto: link; a URL is used as-is. Leave blank to hide."
   }
  ],
  "issingle": 1,

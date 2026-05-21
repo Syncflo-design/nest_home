@@ -39,7 +39,9 @@
 }
 .nh-title { font-size: 22px; font-weight: 700; line-height: 1.2; }
 .nh-greeting { font-size: 13px; opacity: 0.92; margin-top: 3px; }
-.nh-header-right { text-align: right; flex-shrink: 0; }
+.nh-header-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.nh-clockwrap { text-align: right; }
+.nh-header-nest { height: 36px; width: 36px; border-radius: 50%; background: #fff; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
 .nh-clock { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .nh-date { font-size: 12px; opacity: 0.9; margin-top: 2px; }
 
@@ -165,3 +167,8 @@
 .nh-powered { font-size: 12px; letter-spacing: .3px; }
 .nh-nest-logo { height: 22px; width: 22px; border-radius: 5px; }
 .nh-nest-name { font-size: 13px; font-weight: 700; color: var(--nh-text); }
+
+/* Footer support link */
+.nh-foot-sep { opacity: .5; }
+.nh-support { color: var(--nh-primary); font-size: 12px; font-weight: 600; text-decoration: none; }
+.nh-support:hover { text-decoration: underline; }
