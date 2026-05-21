@@ -72,6 +72,19 @@ def _resolve_landing(user):
     return _route_for_label(default_label)
 
 
+def boot_session(bootinfo):
+    """Publish this user's resolved landing route to the desk so the
+    client-side redirect (nest_home_redirect.js) can act on it. Set only when
+    a layout matches the user (or they have an explicit preference); left
+    unset otherwise, so those users simply stay on the standard desk."""
+    try:
+        landing = _resolve_landing(frappe.session.user)
+        if landing:
+            bootinfo["nest_home_landing"] = landing
+    except Exception:
+        pass
+
+
 def get_user_home_page(user):
     """Hook entrypoint. Returns a route string, or None to fall through."""
     try:

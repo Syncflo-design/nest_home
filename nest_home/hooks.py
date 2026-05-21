@@ -31,6 +31,7 @@ get_website_user_home_page = "nest_home.boot.get_user_home_page"
 
 # On login, bust the per-user home_page cache so the resolver re-runs.
 on_session_creation = "nest_home.boot.on_session_creation"
+boot_session = "nest_home.boot.boot_session"
 
 # Seed the default 'Administrator' (System Manager) layout on install and on
 # every migrate. Idempotent — see nest_home.defaults.ensure_admin_layout.
@@ -59,5 +60,5 @@ fixtures = [
 ]
 
 # No global desk bundle — the page loads its own CSS via a <link> tag.
-app_include_js  = []
+app_include_js  = ["/assets/nest_home/js/nest_home_redirect.js"]
 app_include_css = []
