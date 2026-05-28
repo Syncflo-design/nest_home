@@ -45,6 +45,19 @@
 .nh-clock { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .nh-date { font-size: 12px; opacity: 0.9; margin-top: 2px; }
 
+/* Header controls (home + refresh) — translucent on the gradient bar */
+.nh-header-actions { display: flex; align-items: center; gap: 8px; }
+.nh-hbtn {
+  height: 34px; width: 34px; border-radius: 50%; padding: 0;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.15); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer; line-height: 1;
+  transition: background .12s ease, transform .12s ease;
+}
+.nh-hbtn:hover { background: rgba(255,255,255,0.30); transform: translateY(-1px); }
+.nh-hbtn:active { transform: translateY(0); }
+
 /* ---- Horizontal body: left button column + right lists ------------------ */
 .nh-body { display: flex; gap: 22px; align-items: flex-start; }
 .nh-left  { flex: 0 0 304px; max-width: 304px; min-width: 0; }
@@ -108,6 +121,29 @@
 }
 .nh-count.nh-zero { background: var(--nh-border); color: var(--nh-muted); }
 .nh-list-body { padding: 6px; max-height: 620px; overflow-y: auto; }
+
+/* filter + sort toolbar (My Activities header) */
+.nh-list-tools {
+  display: flex; gap: 8px; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid var(--nh-border);
+  background: var(--nh-card);
+}
+.nh-list-tools .nh-filter {
+  flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 10px;
+  border: 1px solid var(--nh-border); border-radius: 8px;
+  font-size: 13px; color: var(--nh-text); background: var(--nh-bg);
+}
+.nh-list-tools .nh-filter::placeholder { color: var(--nh-muted); opacity: .8; }
+.nh-list-tools .nh-filter:focus {
+  outline: none; border-color: var(--nh-primary);
+  box-shadow: 0 0 0 2px rgba(107,133,163,0.18);
+}
+.nh-list-tools .nh-sort {
+  flex: 0 0 auto; height: 30px; padding: 0 8px;
+  border: 1px solid var(--nh-border); border-radius: 8px;
+  font-size: 12px; color: var(--nh-text); background: var(--nh-card); cursor: pointer;
+}
+.nh-list-tools .nh-sort:focus { outline: none; border-color: var(--nh-primary); }
 
 /* condensed item rows: name + due date only */
 .nh-item {

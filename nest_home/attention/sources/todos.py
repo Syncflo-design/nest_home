@@ -75,6 +75,18 @@ def _party_display(dt, rn, rec):
     return rn
 
 
+def _party_contact_company(dt, rec):
+    """Split a party record into (contact, company) for filtering + sorting.
+    Lead -> (lead_name, company_name); Customer -> ("", customer_name)."""
+    if not rec:
+        return "", ""
+    if dt == "Lead":
+        return rec.get("lead_name") or "", rec.get("company_name") or ""
+    if dt == "Customer":
+        return "", rec.get("customer_name") or ""
+    return "", ""
+
+
 def _deep_link(t, has_hub):
     rt, rn = t.get("reference_type"), t.get("reference_name")
     if rt in _PARTY_ENRICH and rn:
@@ -89,10 +101,13 @@ def _todo_item(t, category, who_label, who_value, lookups, has_hub):
     rt, rn = t.get("reference_type"), t.get("reference_name")
 
     party_display = None
+    contact = ""
+    company = ""
     bits = []
     if rt in _PARTY_ENRICH and rn:
         rec = (lookups.get(rt) or {}).get(rn)
         party_display = _party_display(rt, rn, rec)
+        contact, company = _party_contact_company(rt, rec)
         bits.append("{0}: {1}".format(rt, party_display))
     elif rt and rn:
         bits.append("{0} {1}".format(rt, rn))
@@ -115,6 +130,8 @@ def _todo_item(t, category, who_label, who_value, lookups, has_hub):
             "reference_type": rt,
             "reference_name": rn,
             "party": party_display,
+            "contact": contact,
+            "company": company,
         },
     )
 

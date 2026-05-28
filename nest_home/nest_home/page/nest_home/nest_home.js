@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.5-2026-05-21-home-button';
+	var BUILD_MARKER = 'v0.0.9-2026-05-28-my-activities-filter-sort';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -59,6 +59,33 @@ function nh_due(it) {
 	return { text: txt, over: over };
 }
 
+// Comparator for two display strings; blanks sort last, case-insensitive.
+function nh_cmp(x, y) {
+	x = (x || '').toLowerCase(); y = (y || '').toLowerCase();
+	if (!x && !y) return 0;
+	if (!x) return 1;
+	if (!y) return -1;
+	return x < y ? -1 : (x > y ? 1 : 0);
+}
+
+// Returns a sort comparator for the given key (date|contact|company).
+function nh_sorter(key) {
+	if (key === 'contact') {
+		return function(a, b) { return nh_cmp((a.meta || {}).contact, (b.meta || {}).contact); };
+	}
+	if (key === 'company') {
+		return function(a, b) { return nh_cmp((a.meta || {}).company, (b.meta || {}).company); };
+	}
+	// default: due date ascending, undated rows last.
+	return function(a, b) {
+		var ad = a.date || '', bd = b.date || '';
+		if (!ad && !bd) return 0;
+		if (!ad) return 1;
+		if (!bd) return -1;
+		return ad < bd ? -1 : (ad > bd ? 1 : 0);
+	};
+}
+
 class NestHome {
 
 	constructor(page, build) {
@@ -66,6 +93,9 @@ class NestHome {
 		this.build = build;
 		this.allowed = ['A'];           // refined once context loads
 		this.poll_handle = null;
+		this.items = {};        // last-loaded items per category (client filter/sort)
+		this.filter_text = {};  // active search text per category
+		this.sort_key = {};     // active sort key per category
 
 		// v16 modern desk: page.body is a jQuery object (NOT a DOM element).
 		// Create our own container — never $(wrapper).find('.x'). See
@@ -77,11 +107,39 @@ class NestHome {
 		this.bind_events();
 		this.start_clock();
 		this.init();
+		this.collapse_sidebar_once();
+	}
+
+	// Auto-hide the desk sidebar on arrival. Clicks Frappe's own toggle (so the
+	// user can click it again to bring the sidebar back) and only ever collapses,
+	// never force-expands. Runs once per desk session. Selector list is defensive
+	// across v15/v16 desk markup.
+	collapse_sidebar_once() {
+		if (window.__nh_sidebar_collapsed) return;
+		window.__nh_sidebar_collapsed = true;
+
+		var tries = 0;
+		var iv = setInterval(function() {
+			tries++;
+			var $toggle = $('.sidebar-toggle-btn, .collapse-sidebar, .sidebar-toggle')
+				.filter(':visible').first();
+			if ($toggle.length) {
+				var $sb = $('.body-sidebar-container, .desk-sidebar').first();
+				var collapsed = $('body').is('.sidebar-collapsed')
+					|| $sb.is('.sidebar-collapsed, .collapsed');
+				if (!collapsed) $toggle.get(0).click();
+				clearInterval(iv);
+			} else if (tries > 15) {
+				clearInterval(iv);
+			}
+		}, 120);
 	}
 
 	setup_page_actions() {
-		var me = this;
-		this.page.set_secondary_action('Refresh', function() { me.refresh(); }, 'refresh');
+		// Single header bar: hide the default desk page-head. Home + Refresh now
+		// live in the branded header (see render_shell / bind_events).
+		var $head = this.page.head ? $(this.page.head) : $(this.page.wrapper).find('.page-head');
+		if ($head && $head.length) $head.hide();
 	}
 
 	render_shell() {
@@ -101,6 +159,10 @@ class NestHome {
 			'        <div class="nh-date" id="nh-date"></div>',
 			'      </div>',
 			'      <img class="nh-header-nest" id="nh-header-nest" src="/assets/nest_home/images/nesterp_logo.svg" alt="NestERP" title="NestERP" style="display:none;">',
+			'      <div class="nh-header-actions">',
+			'        <button class="nh-hbtn" id="nh-home" title="Home" aria-label="Home"><i class="fa fa-home"></i></button>',
+			'        <button class="nh-hbtn" id="nh-refresh" title="Refresh" aria-label="Refresh"><i class="fa fa-refresh"></i></button>',
+			'      </div>',
 			'    </div>',
 			'  </div>',
 			'  <div class="nh-body">',
@@ -143,6 +205,21 @@ class NestHome {
 		// Quick-launch tile → navigate to its route.
 		this.$main.on('click', '.nh-tile', function() {
 			me.open_route($(this).data('route'));
+		});
+		// Header controls.
+		this.$main.on('click', '#nh-refresh', function() { me.refresh(); });
+		this.$main.on('click', '#nh-home', function() { frappe.set_route('nest-home'); });
+
+		// List filter + sort (currently My Activities only) — client-side.
+		this.$main.on('input', '.nh-filter', function() {
+			var cat = (this.id || '').replace('nh-filter-', '');
+			me.filter_text[cat] = this.value || '';
+			me.apply_view(cat);
+		});
+		this.$main.on('change', '.nh-sort', function() {
+			var cat = (this.id || '').replace('nh-sort-', '');
+			me.sort_key[cat] = this.value || 'date';
+			me.apply_view(cat);
 		});
 	}
 
@@ -245,6 +322,17 @@ class NestHome {
 	build_list_sections() {
 		var html = this.allowed.map(function(cat) {
 			var m = NH_LIST_META[cat];
+			// My Activities (A) gets a filter + sort toolbar in its header.
+			var tools = (cat === 'A') ? [
+				'  <div class="nh-list-tools">',
+				'    <input type="text" class="nh-filter" id="nh-filter-' + cat + '" placeholder="Filter by contact or company…" autocomplete="off">',
+				'    <select class="nh-sort" id="nh-sort-' + cat + '" title="Sort">',
+				'      <option value="date">Due date</option>',
+				'      <option value="contact">Contact A-Z</option>',
+				'      <option value="company">Company A-Z</option>',
+				'    </select>',
+				'  </div>'
+			].join('\n') : '';
 			return [
 				'<section class="nh-list" id="nh-list-' + cat + '">',
 				'  <div class="nh-list-head">',
@@ -254,6 +342,7 @@ class NestHome {
 				'    </div>',
 				'    <span class="nh-count nh-zero" id="nh-count-' + cat + '">0</span>',
 				'  </div>',
+				tools,
 				'  <div class="nh-list-body" id="nh-body-' + cat + '">',
 				'    <div class="nh-loading">Loading…</div>',
 				'  </div>',
@@ -271,7 +360,7 @@ class NestHome {
 		var me = this;
 		return frappe.call({
 			method: 'nest_home.api.get_attention',
-			args: { categories: JSON.stringify(cats) }
+			args: { categories: JSON.stringify(cats), limit_per: 200 }
 		}).then(function(r) {
 			var data = (r && r.message) || {};
 			cats.forEach(function(cat) { me.render_list(cat, data[cat] || []); });
@@ -283,15 +372,45 @@ class NestHome {
 	}
 
 	render_list(cat, items) {
+		this.items[cat] = items || [];
+		this.apply_view(cat);
+	}
+
+	// Render a category's stored items through its active filter + sort.
+	// Filter matches contact OR company (case-insensitive substring); sort key
+	// is date|contact|company. Cheap enough to re-run on every keystroke / poll.
+	apply_view(cat) {
 		var $body = $('#nh-body-' + cat);
 		var $count = $('#nh-count-' + cat);
+		var all = this.items[cat] || [];
+		var q = (this.filter_text[cat] || '').trim().toLowerCase();
+
+		var items = all;
+		if (q) {
+			items = all.filter(function(it) {
+				var m = it.meta || {};
+				var c = (m.contact || '').toLowerCase();
+				var co = (m.company || '').toLowerCase();
+				return c.indexOf(q) >= 0 || co.indexOf(q) >= 0;
+			});
+		}
+		items = items.slice().sort(nh_sorter(this.sort_key[cat] || 'date'));
+
 		$count.text(items.length).toggleClass('nh-zero', items.length === 0);
 
-		if (!items.length) { $body.html(this.empty_state(cat)); return; }
+		if (!items.length) {
+			if (q && all.length) {
+				$body.html('<div class="nh-empty"><div class="nh-empty-title">No matches</div>'
+					+ '<div class="nh-empty-msg">Nothing matches “'
+					+ frappe.utils.escape_html(q) + '”.</div></div>');
+			} else {
+				$body.html(this.empty_state(cat));
+			}
+			return;
+		}
 
 		var me = this;
-		var rows = items.map(function(it) { return me.item_html(it); }).join('\n');
-		$body.html(rows);
+		$body.html(items.map(function(it) { return me.item_html(it); }).join('\n'));
 	}
 
 	// Condensed row: company/lead name on the left, due date on the right.
