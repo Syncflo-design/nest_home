@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.9-2026-05-28-my-activities-filter-sort';
+	var BUILD_MARKER = 'v0.0.10-2026-05-28-my-activities-toolbar-polish';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the

@@ -124,26 +124,35 @@
 
 /* filter + sort toolbar (My Activities header) */
 .nh-list-tools {
-  display: flex; gap: 8px; align-items: center;
-  padding: 9px 12px; border-bottom: 1px solid var(--nh-border);
+  display: flex; gap: 8px; align-items: stretch; width: 100%;
+  padding: 10px 12px; border-bottom: 1px solid var(--nh-border);
   background: var(--nh-card);
 }
-.nh-list-tools .nh-filter {
-  flex: 1 1 auto; min-width: 0; height: 30px; padding: 0 10px;
+/* Shared control styling so the input + select are visually identical. */
+.nh-list-tools .nh-filter,
+.nh-list-tools .nh-sort {
+  box-sizing: border-box; height: 34px; line-height: 1.2;
   border: 1px solid var(--nh-border); border-radius: 8px;
-  font-size: 13px; color: var(--nh-text); background: var(--nh-bg);
+  font-size: 13px; font-family: inherit; color: var(--nh-text);
+  transition: border-color .12s ease, box-shadow .12s ease;
 }
-.nh-list-tools .nh-filter::placeholder { color: var(--nh-muted); opacity: .8; }
-.nh-list-tools .nh-filter:focus {
+.nh-list-tools .nh-filter {
+  flex: 1 1 auto; min-width: 0; padding: 0 12px;
+  background: var(--nh-bg);
+}
+.nh-list-tools .nh-filter::placeholder { color: var(--nh-muted); opacity: .85; }
+.nh-list-tools .nh-sort {
+  flex: 0 0 38%; max-width: 200px; cursor: pointer;
+  padding: 0 30px 0 12px; background-color: var(--nh-card);
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b6471' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.nh-list-tools .nh-filter:focus,
+.nh-list-tools .nh-sort:focus {
   outline: none; border-color: var(--nh-primary);
   box-shadow: 0 0 0 2px rgba(107,133,163,0.18);
 }
-.nh-list-tools .nh-sort {
-  flex: 0 0 auto; height: 30px; padding: 0 8px;
-  border: 1px solid var(--nh-border); border-radius: 8px;
-  font-size: 12px; color: var(--nh-text); background: var(--nh-card); cursor: pointer;
-}
-.nh-list-tools .nh-sort:focus { outline: none; border-color: var(--nh-primary); }
 
 /* condensed item rows: name + due date only */
 .nh-item {
