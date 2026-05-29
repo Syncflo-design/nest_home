@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.10-2026-05-28-my-activities-toolbar-polish';
+	var BUILD_MARKER = 'v0.0.12-2026-05-29-sidebar-auto-hide';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -31,7 +31,10 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 };
 
 frappe.pages['nest-home'].on_page_show = function(wrapper) {
-	if (wrapper.nestHome) wrapper.nestHome.refresh();
+	if (wrapper.nestHome) {
+		wrapper.nestHome.refresh();
+		wrapper.nestHome.collapse_sidebar();
+	}
 };
 
 // ---------------------------------------------------------------------------
@@ -107,17 +110,14 @@ class NestHome {
 		this.bind_events();
 		this.start_clock();
 		this.init();
-		this.collapse_sidebar_once();
+		this.collapse_sidebar();
 	}
 
 	// Auto-hide the desk sidebar on arrival. Clicks Frappe's own toggle (so the
 	// user can click it again to bring the sidebar back) and only ever collapses,
-	// never force-expands. Runs once per desk session. Selector list is defensive
-	// across v15/v16 desk markup.
-	collapse_sidebar_once() {
-		if (window.__nh_sidebar_collapsed) return;
-		window.__nh_sidebar_collapsed = true;
-
+	// never force-expands. Runs every time the page is shown (on_page_show +
+	// initial make). Selector list is defensive across v15/v16 desk markup.
+	collapse_sidebar() {
 		var tries = 0;
 		var iv = setInterval(function() {
 			tries++;
@@ -341,8 +341,8 @@ class NestHome {
 				'      <div class="nh-list-sub">' + m.sub + '</div>',
 				'    </div>',
 				'    <span class="nh-count nh-zero" id="nh-count-' + cat + '">0</span>',
-				'  </div>',
 				tools,
+				'  </div>',
 				'  <div class="nh-list-body" id="nh-body-' + cat + '">',
 				'    <div class="nh-loading">Loading…</div>',
 				'  </div>',
