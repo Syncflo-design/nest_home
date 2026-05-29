@@ -24,6 +24,8 @@ from nest_home.attention.schema import make_item
 #   doctype      : the document type to scan
 #   gate_ptype   : permission the user must hold for this source to apply
 #   docstatus    : which docstatus counts as "awaiting" (0 = Draft for v1)
+#   extra_filters: optional dict merged into the get_list filters (e.g. gate on
+#                  a custom "ready" flag so only handed-over docs show)
 #   party_field  : fieldname of the counterparty (shown in subtitle)
 #   date_field   : fieldname of the transaction/posting date
 #   amount_field : optional fieldname of a total to surface in meta
@@ -39,6 +41,20 @@ AWAITING_RULES = [
         "amount_field": "grand_total",
         "currency_field": "currency",
         "label": "Sales Order",
+    },
+    {
+        "doctype": "Sales Invoice",
+        "gate_ptype": "submit",
+        "docstatus": 0,
+        # Only invoices presales has explicitly handed over via the
+        # "Submit for Approval" button (custom_ready_for_approval = 1) —
+        # half-finished drafts stay off the shared board.
+        "extra_filters": {"custom_ready_for_approval": 1},
+        "party_field": "customer",
+        "date_field": "posting_date",
+        "amount_field": "grand_total",
+        "currency_field": "currency",
+        "label": "Sales Invoice",
     },
     {
         "doctype": "Purchase Order",
@@ -101,9 +117,12 @@ def _rule_items(rule, user, limit):
             wanted.append(f)
     wanted = list(dict.fromkeys(wanted))  # de-dupe, keep order
 
+    filters = {"docstatus": rule.get("docstatus", 0)}
+    filters.update(rule.get("extra_filters") or {})
+
     rows = frappe.get_list(
         dt,
-        filters={"docstatus": rule.get("docstatus", 0)},
+        filters=filters,
         fields=wanted,
         order_by="modified desc",
         limit_page_length=limit,
