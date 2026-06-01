@@ -13,7 +13,9 @@ import frappe
 
 ADMIN_LAYOUT_NAME = "Administrator"
 
-# Mirrors the main desk workspaces. (label, workspace route slug, icon, colour)
+# Standard tile library. The admin layout uses the _ADMIN_TILES subset;
+# the full library is available for any layout via build_profile_view.
+# (label, route, icon, colour)
 _ADMIN_TILES = [
     ("Selling",           "selling",           "fa fa-shopping-cart", "#6b85a3"),
     ("Buying",            "buying",            "fa fa-shopping-bag",  "#b08968"),
@@ -30,6 +32,24 @@ _ADMIN_TILES = [
     ("Website",           "website",           "fa fa-globe",         "#5b9aa0"),
     ("Settings",          "erpnext-settings",  "fa fa-cog",           "#7a7a8a"),
     ("Insights",          "insights",          "fa fa-line-chart",    "#5b7a99"),
+]
+
+# Additional standard tiles available in the library for role-specific layouts.
+# Created by ensure_standard_tiles() on install/migrate, never on the admin layout.
+_LIBRARY_TILES = [
+    ("Open POS",             "point-of-sale",             "fa fa-credit-card",   "#1E6A52"),
+    ("POS Closing",          "pos-closing-entry/new",     "fa fa-calculator",    "#6b85a3"),
+    ("Stock Transfer",       "stock-transfer/new",        "fa fa-truck",         "#1E6A52"),
+    ("Our Items",            "query-report/Stock Balance", "fa fa-cubes",        "#1E6A52"),
+    ("Sales Persons",        "sales-person",              "fa fa-users",         "#9a7aa0"),
+    ("New Sales Person",     "sales-person/new",          "fa fa-user-plus",     "#82a085"),
+    ("Sales Invoices",       "sales-invoice",             "fa fa-file-text-o",   "#5b7a99"),
+    ("Items",                "item",                      "fa fa-cubes",         "#1E6A52"),
+    ("New Item",             "item/new",                  "fa fa-plus-circle",   "#82a085"),
+    ("Import from Kiln Sheet", "item-importer/new",       "fa fa-upload",        "#b08968"),
+    ("Stock Entry",          "stock-entry/new",           "fa fa-exchange",      "#6b85a3"),
+    ("Stock Reconciliation", "stock-reconciliation/new",  "fa fa-tasks",         "#a08a6b"),
+    ("Stock Balance",        "query-report/Stock Balance", "fa fa-bar-chart",    "#5b7a99"),
 ]
 
 
@@ -97,6 +117,20 @@ def ensure_admin_layout():
         frappe.db.commit()
     except Exception:
         frappe.log_error(frappe.get_traceback(), "nest_home.ensure_admin_layout")
+
+
+def ensure_standard_tiles():
+    """Create the library tiles that ship with nest_home. Idempotent — matched
+    by label, so re-runs never duplicate. Called from after_install / after_migrate
+    alongside ensure_admin_layout."""
+    try:
+        if not _doctypes_ready():
+            return
+        for i, (label, route, icon, color) in enumerate(_LIBRARY_TILES):
+            _ensure_tile(label, route, icon, color, i + len(_ADMIN_TILES))
+        frappe.db.commit()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "nest_home.ensure_standard_tiles")
 
 
 # ---------------------------------------------------------------------------

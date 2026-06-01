@@ -34,9 +34,15 @@ on_session_creation = "nest_home.boot.on_session_creation"
 boot_session = "nest_home.boot.boot_session"
 
 # Seed the default 'Administrator' (System Manager) layout on install and on
-# every migrate. Idempotent — see nest_home.defaults.ensure_admin_layout.
-after_install = "nest_home.defaults.ensure_admin_layout"
-after_migrate = "nest_home.defaults.ensure_admin_layout"
+# every migrate. Idempotent — see nest_home.defaults.
+after_install = [
+    "nest_home.defaults.ensure_admin_layout",
+    "nest_home.defaults.ensure_standard_tiles",
+]
+after_migrate = [
+    "nest_home.defaults.ensure_admin_layout",
+    "nest_home.defaults.ensure_standard_tiles",
+]
 
 # ---------------------------------------------------------------------------
 # Fixtures shipped with the app.
