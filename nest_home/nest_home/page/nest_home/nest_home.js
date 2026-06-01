@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.14-2026-06-01-open-in-new-tab';
+	var BUILD_MARKER = 'v0.0.15-2026-06-01-help-discovery';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -303,8 +303,9 @@ class NestHome {
 			var accent = t.color ? (' style="--nh-tile-accent:' + esc(t.color) + ';"') : '';
 			var icon = nh_tile_icon(t);
 			var icon_cls = t.icon_image ? 'nh-tile-icon nh-tile-icon-img' : 'nh-tile-icon';
+			var help_slug = esc(t.label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
 			return [
-				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '"' + (t.open_in_new_tab ? ' data-newtab="1"' : '') + '>',
+				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '"' + (t.open_in_new_tab ? ' data-newtab="1"' : '') + ' data-help="' + help_slug + '">',
 				'  <div class="' + icon_cls + '">' + icon + '</div>',
 				'  <div class="nh-tile-label">' + esc(t.label || '') + '</div>',
 				'</div>'
@@ -312,6 +313,8 @@ class NestHome {
 		}).join('\n');
 		$('#nh-tiles').html(html);
 		$('#nh-left').show();
+		// If nest_help app is installed, auto-discover help badges for tiles.
+		if (window.nestHelp) window.nestHelp.discover($('#nh-tiles'));
 
 		// An uploaded image (icon_image) wins; then a URL/path in `icon`; then a
 		// Font Awesome / Octicon class; otherwise treat `icon` as emoji / text.
