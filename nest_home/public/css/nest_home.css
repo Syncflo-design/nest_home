@@ -60,8 +60,8 @@
 
 /* ---- Horizontal body: left button column + right lists ------------------ */
 .nh-body { display: flex; gap: 22px; align-items: flex-start; }
-.nh-left  { flex: 0 0 304px; max-width: 304px; min-width: 0; }
-.nh-right { flex: 1 1 auto; min-width: 0; }
+.nh-left  { flex: 1 1 50%; max-width: 50%; min-width: 0; }
+.nh-right { flex: 1 1 50%; max-width: 50%; min-width: 0; }
 
 .nh-section-label {
   font-size: 12px; font-weight: 700; text-transform: uppercase;
@@ -105,6 +105,7 @@
 }
 .nh-list-head {
   display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; row-gap: 10px;
   padding: 14px 18px; border-bottom: 1px solid var(--nh-border);
   background: var(--subtle-fg, #f0f2f5);
 }
@@ -122,11 +123,10 @@
 .nh-count.nh-zero { background: var(--nh-border); color: var(--nh-muted); }
 .nh-list-body { padding: 6px; max-height: 620px; overflow-y: auto; }
 
-/* filter + sort toolbar (My Activities header) */
+/* filter + sort toolbar — a full-width second line inside the list header bar */
 .nh-list-tools {
-  display: flex; gap: 8px; align-items: stretch; width: 100%;
-  padding: 10px 12px; border-bottom: 1px solid var(--nh-border);
-  background: var(--nh-card);
+  display: flex; gap: 8px; align-items: stretch;
+  flex: 1 0 100%; width: 100%;
 }
 /* Shared control styling so the input + select are visually identical. */
 .nh-list-tools .nh-filter,
@@ -134,16 +134,16 @@
   box-sizing: border-box; height: 34px; line-height: 1.2;
   border: 1px solid var(--nh-border); border-radius: 8px;
   font-size: 13px; font-family: inherit; color: var(--nh-text);
+  background-color: transparent;
   transition: border-color .12s ease, box-shadow .12s ease;
 }
 .nh-list-tools .nh-filter {
   flex: 1 1 auto; min-width: 0; padding: 0 12px;
-  background: var(--nh-bg);
 }
 .nh-list-tools .nh-filter::placeholder { color: var(--nh-muted); opacity: .85; }
 .nh-list-tools .nh-sort {
   flex: 0 0 38%; max-width: 200px; cursor: pointer;
-  padding: 0 30px 0 12px; background-color: var(--nh-card);
+  padding: 0 30px 0 12px;
   -webkit-appearance: none; -moz-appearance: none; appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b6471' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 10px center;
