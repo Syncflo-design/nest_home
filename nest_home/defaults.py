@@ -42,7 +42,7 @@ def _doctypes_ready():
         return False
 
 
-def _ensure_tile(label, route, icon, color, sort_order):
+def _ensure_tile(label, route, icon, color, sort_order, open_in_new_tab=0):
     """Return the name of the library button with this label, creating it if
     absent. Matching by label keeps re-runs from making duplicates."""
     name = frappe.db.get_value("Nest Home Tile", {"label": label}, "name")
@@ -56,6 +56,7 @@ def _ensure_tile(label, route, icon, color, sort_order):
         "color": color,
         "route": route,
         "sort_order": sort_order,
+        "open_in_new_tab": open_in_new_tab,
     })
     # Use an explicit, deterministic name and bypass the naming series. The
     # fixture buttons (NEST-TILE-0001..) were imported with fixed names without
@@ -130,6 +131,7 @@ def _resolve_tile_spec(spec, sort_order=0):
             spec.get("icon") or "octicon octicon-rocket",
             spec.get("color") or "",
             spec.get("sort_order", sort_order),
+            spec.get("open_in_new_tab", 0),
         )
     frappe.throw("Each tile must be a string (name/label) or a dict.")
 

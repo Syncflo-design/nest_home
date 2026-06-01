@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series", "label", "enabled", "column_break_1", "icon", "icon_image", "color",
-  "route_section", "route", "description",
+  "route_section", "route", "open_in_new_tab", "description",
   "roles_section", "allowed_roles", "sort_order"
  ],
  "fields": [
@@ -19,6 +19,7 @@
   {"fieldname": "color", "fieldtype": "Data", "label": "Accent Colour", "description": "Optional hex (e.g. #1F4E79). Defaults to the theme primary."},
   {"fieldname": "route_section", "fieldtype": "Section Break", "label": "Target"},
   {"fieldname": "route", "fieldtype": "Data", "label": "Target Route", "reqd": 1, "in_list_view": 1, "description": "Desk route the tile opens, e.g. '/app/sales-order/new', '/app/crm-mobile', or '/app/sales-order'."},
+  {"fieldname": "open_in_new_tab", "fieldtype": "Check", "label": "Open in New Tab", "default": "0", "description": "When enabled, the tile opens the route in a new browser tab instead of navigating within the desk."},
   {"fieldname": "description", "fieldtype": "Small Text", "label": "Description", "description": "Optional sub-label shown under the tile title."},
   {"fieldname": "roles_section", "fieldtype": "Section Break", "label": "Visibility & Order"},
   {"fieldname": "allowed_roles", "fieldtype": "Table", "label": "Allowed Roles", "options": "Nest Home Tile Role", "description": "Leave empty to show the tile to everyone."},

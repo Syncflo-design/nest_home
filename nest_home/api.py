@@ -168,6 +168,7 @@ def _tile_payload(doc):
         "color": getattr(doc, "color", None) or "",
         "description": getattr(doc, "description", None) or "",
         "sort_order": doc.sort_order or 0,
+        "open_in_new_tab": bool(getattr(doc, "open_in_new_tab", 0)),
     }
 
 

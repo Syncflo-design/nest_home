@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.13-2026-06-01-50-50-layout';
+	var BUILD_MARKER = 'v0.0.14-2026-06-01-open-in-new-tab';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -204,7 +204,7 @@ class NestHome {
 		});
 		// Quick-launch tile → navigate to its route.
 		this.$main.on('click', '.nh-tile', function() {
-			me.open_route($(this).data('route'));
+			me.open_route($(this).data('route'), $(this).data('newtab'));
 		});
 		// Header controls.
 		this.$main.on('click', '#nh-refresh', function() { me.refresh(); });
@@ -223,9 +223,15 @@ class NestHome {
 		});
 	}
 
-	open_route(route) {
+	open_route(route, new_tab) {
 		if (!route) return;
-		if (/^https?:/i.test(route)) { window.open(route, '_blank'); return; }
+		if (new_tab || /^https?:/i.test(route)) {
+			// For relative routes opened in new tab, build the full /app/ URL.
+			var url = /^https?:/i.test(route) ? route
+				: window.location.origin + '/app/' + String(route).replace(/^\/app\//, '').replace(/^\//, '');
+			window.open(url, '_blank');
+			return;
+		}
 		var r = String(route).replace(/^\/app\//, '').replace(/^\//, '');
 		frappe.set_route(r ? r.split('/') : ['']);
 	}
@@ -298,7 +304,7 @@ class NestHome {
 			var icon = nh_tile_icon(t);
 			var icon_cls = t.icon_image ? 'nh-tile-icon nh-tile-icon-img' : 'nh-tile-icon';
 			return [
-				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '">',
+				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '"' + (t.open_in_new_tab ? ' data-newtab="1"' : '') + '>',
 				'  <div class="' + icon_cls + '">' + icon + '</div>',
 				'  <div class="nh-tile-label">' + esc(t.label || '') + '</div>',
 				'</div>'
