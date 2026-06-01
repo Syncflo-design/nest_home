@@ -26,7 +26,7 @@ _ADMIN_TILES = [
     ("Assets",            "assets",            "fa fa-cube",          "#6b9a8a"),
     ("Projects",          "projects",          "fa fa-tasks",         "#8a8a6b"),
     ("Support",           "support",           "fa fa-life-ring",     "#a07a7a"),
-    ("Users",             "users",             "fa fa-user",          "#6b85a3"),
+    ("Users",             "user",              "fa fa-user",          "#6b85a3"),
     ("Website",           "website",           "fa fa-globe",         "#5b9aa0"),
     ("Settings",          "erpnext-settings",  "fa fa-cog",           "#7a7a8a"),
     ("Insights",          "insights",          "fa fa-line-chart",    "#5b7a99"),
