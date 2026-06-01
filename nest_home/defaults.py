@@ -21,6 +21,7 @@ _ADMIN_TILES = [
     ("Invoicing",         "invoicing",         "fa fa-file-text-o",   "#7a8aa0"),
     ("Financial Reports", "financial-reports", "fa fa-bar-chart",     "#5b7a99"),
     ("CRM",               "crm",               "fa fa-users",         "#9a7aa0"),
+    ("Customers",         "customer",          "fa fa-address-book",  "#9a7aa0"),
     ("Manufacturing",     "manufacturing",     "fa fa-industry",      "#a08a6b"),
     ("Assets",            "assets",            "fa fa-cube",          "#6b9a8a"),
     ("Projects",          "projects",          "fa fa-tasks",         "#8a8a6b"),
@@ -28,6 +29,7 @@ _ADMIN_TILES = [
     ("Users",             "users",             "fa fa-user",          "#6b85a3"),
     ("Website",           "website",           "fa fa-globe",         "#5b9aa0"),
     ("Settings",          "erpnext-settings",  "fa fa-cog",           "#7a7a8a"),
+    ("Insights",          "insights",          "fa fa-line-chart",    "#5b7a99"),
 ]
 
 
