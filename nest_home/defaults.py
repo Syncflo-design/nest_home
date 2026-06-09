@@ -32,6 +32,8 @@ _ADMIN_TILES = [
     ("Website",           "website",           "fa fa-globe",         "#5b9aa0"),
     ("Settings",          "erpnext-settings",  "fa fa-cog",           "#7a7a8a"),
     ("Insights",          "insights",          "fa fa-line-chart",    "#5b7a99"),
+    ("Import from Kiln Sheet", "item-importer/new", "fa fa-upload",  "#b08968"),
+    ("Import Home/Fashion", "home-fashion-importer/new", "fa fa-upload", "#9a7aa0"),
 ]
 
 # Additional standard tiles available in the library for role-specific layouts.
@@ -47,6 +49,8 @@ _LIBRARY_TILES = [
     ("Items",                "item",                      "fa fa-cubes",         "#1E6A52"),
     ("New Item",             "item/new",                  "fa fa-plus-circle",   "#82a085"),
     ("Import from Kiln Sheet", "item-importer/new",       "fa fa-upload",        "#b08968"),
+    ("Import Home/Fashion",  "home-fashion-importer/new", "fa fa-upload",        "#9a7aa0"),
+    ("Manufacturers",        "manufacturer",              "fa fa-paint-brush",   "#9a7aa0"),
     ("Stock Entry",          "stock-entry/new",           "fa fa-exchange",      "#6b85a3"),
     ("Stock Reconciliation", "stock-reconciliation/new",  "fa fa-tasks",         "#a08a6b"),
     ("Stock Balance",        "query-report/Stock Balance", "fa fa-bar-chart",    "#5b7a99"),
