@@ -225,14 +225,22 @@ class NestHome {
 
 	open_route(route, new_tab) {
 		if (!route) return;
+		route = String(route);
+		// Website/portal routes are absolute paths outside the desk (not under /app);
+		// open them as real page loads instead of pushing them through the desk router.
+		if (route.charAt(0) === '/' && !/^\/app(\/|$|\?|#)/.test(route)) {
+			if (new_tab) window.open(route, '_blank');
+			else window.location.href = route;
+			return;
+		}
 		if (new_tab || /^https?:/i.test(route)) {
 			// For relative routes opened in new tab, build the full /app/ URL.
 			var url = /^https?:/i.test(route) ? route
-				: window.location.origin + '/app/' + String(route).replace(/^\/app\//, '').replace(/^\//, '');
+				: window.location.origin + '/app/' + route.replace(/^\/app\//, '').replace(/^\//, '');
 			window.open(url, '_blank');
 			return;
 		}
-		var r = String(route).replace(/^\/app\//, '').replace(/^\//, '');
+		var r = route.replace(/^\/app\//, '').replace(/^\//, '');
 		frappe.set_route(r ? r.split('/') : ['']);
 	}
 
