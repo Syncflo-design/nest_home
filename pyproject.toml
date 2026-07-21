@@ -13,3 +13,7 @@ build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
 name = "nest_home"
+
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0,<17.0.0"
