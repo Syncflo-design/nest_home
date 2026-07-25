@@ -100,3 +100,25 @@ role_home_page still covers managers. Record the answer here after smoke test.
   PreSales) with tiles CRM/Leads/Customers/New Sales Invoice/New Supplier Invoice
   (`NEST-TILE-0007..0011`); fixed the `NEST-TILE-` series counter (was stuck at 1
   → set to 6) so future tile inserts don't collide.
+
+## v0.0.17 — 2026-07-24 (staged, deploy pending): permanent POS price safety-net
+
+- **`nest_home/pos_pricing.py`** + `hooks.override_whitelisted_methods`: wraps the
+  POS `erpnext...point_of_sale.get_items`. Any item returned with **no selling
+  price on the active price list gets a persisted `0.01` sentinel Item Price**,
+  created inline (on item load, only for items actually shown — no mass backfill),
+  so the till can NEVER block on "Price is not set for the item" again.
+- **0.01 is deliberate**: never a plausible price, glaringly obvious on the
+  receipt, and the exact-`0.01` rate is the worklist marker — `Item Price` filtered
+  to `price_list_rate = 0.01` = every item still needing a real price. Nothing else
+  prices at 1 cent.
+- **Universal & permanent** (all companies/profiles), per Russell's call. Trade-off
+  he accepted: a genuinely unpriced item in a live store could ring up at R0.01 if a
+  cashier ignores the obvious cent — the visible-wrongness IS the safeguard.
+- Bulletproofed: any exception in the wrapper logs and returns erpnext's own
+  result; `**kwargs` absorbs future signature drift; `insert(ignore_permissions)`.
+- Prompted by Ardmore UAT: Online Store Test POS blocked on the FABCB* swatches
+  (no price on `Ardmore Ceramics TEST - Retail`). Those 4 were given real R10 test
+  prices; this override stops it recurring for anything else.
+- **Deploy**: bundles with the pending `nest_help` v0.0.2 POS-crash shim. Push →
+  Frappe Cloud bench `Ardmore_KZN` → Pull Updates → **fresh Deploy** (asset+code).

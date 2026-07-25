@@ -68,3 +68,14 @@ fixtures = [
 # No global desk bundle — the page loads its own CSS via a <link> tag.
 app_include_js  = ["/assets/nest_home/js/nest_home_redirect.js"]
 app_include_css = []
+
+# ---------------------------------------------------------------------------
+# Permanent POS price safety-net.
+#
+# Replace the POS get_items with a wrapper that gives any price-less item a 0.01
+# sentinel price (persisted) so the till can never block on "Price is not set".
+# On demand, only for items actually loaded — no mass backfill. See pos_pricing.py.
+# ---------------------------------------------------------------------------
+override_whitelisted_methods = {
+    "erpnext.selling.page.point_of_sale.point_of_sale.get_items": "nest_home.pos_pricing.get_items",
+}
