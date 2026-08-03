@@ -24,6 +24,10 @@ import frappe
 
 FALLBACK_RATE = 0.01
 
+#: Item field holding the generated, scannable POS barcode. Optional — sites
+#: without it degrade to no barcode on the tile rather than erroring.
+FIELD_POS_BARCODE = "custom_pos_barcode"
+
 
 @frappe.whitelist()
 def get_items(start, page_length, price_list, item_group, pos_profile, search_term="", **kwargs):
@@ -53,6 +57,52 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing.get_items")
 
 	return result
+
+
+@frappe.whitelist()
+def get_pos_barcodes(item_codes):
+	"""Return the scannable POS barcode for each of ``item_codes``.
+
+	Used by the nest_help POS shim to print the number under each item tile, so a
+	cashier can confirm they have the right product — and key the number in by
+	hand if the shelf sticker is missing or unreadable.
+
+	Returns ``{"barcodes": {item_code: barcode}}`` — always a truthy dict, even
+	when empty (see gotcha 2026-05-13: a whitelisted method must return truthy).
+	Sites without the ``custom_pos_barcode`` field simply get an empty map, so
+	this is safe on any NestERP install.
+	"""
+	import json
+
+	if isinstance(item_codes, str):
+		try:
+			item_codes = json.loads(item_codes)
+		except ValueError:
+			item_codes = [item_codes]
+
+	out = {}
+
+	if not item_codes:
+		return {"barcodes": out}
+
+	if not frappe.get_meta("Item").has_field(FIELD_POS_BARCODE):
+		return {"barcodes": out}
+
+	try:
+		rows = frappe.get_all(
+			"Item",
+			filters={"name": ["in", list(item_codes)[:500]]},
+			fields=["name", FIELD_POS_BARCODE],
+		)
+		for row in rows:
+			value = row.get(FIELD_POS_BARCODE)
+			if value:
+				out[row.get("name")] = value
+	except Exception:
+		# Never let a display nicety break the till.
+		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing.get_pos_barcodes")
+
+	return {"barcodes": out}
 
 
 def _ensure_sentinel_price(item_code, price_list, uom=None):
