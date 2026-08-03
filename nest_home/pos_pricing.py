@@ -39,9 +39,11 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	signature change upstream can never break this override."""
 	from erpnext.selling.page.point_of_sale.point_of_sale import get_items as erp_get_items
 
-	search_term = _resolve_pos_barcode(search_term)
-
 	result = erp_get_items(start, page_length, price_list, item_group, pos_profile, search_term)
+
+	result = _add_barcode_matches(
+		result, search_term, price_list, item_group, pos_profile, erp_get_items
+	)
 
 	try:
 		if price_list and isinstance(result, dict):
@@ -61,34 +63,71 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	return result
 
 
-def _resolve_pos_barcode(search_term):
-	"""Translate a typed POS barcode into the item code the POS can search on.
+#: Digits typed before we start matching POS barcodes. Below this almost every
+#: item matches, which is noise rather than a search.
+BARCODE_SEARCH_MIN_DIGITS = 3
 
-	The barcode printed on the shelf label is a generated number
-	(``Item.custom_pos_barcode``), not the item code. A scanner resolves it via
-	the standard Item Barcode table, but the POS *search box* matches on item
-	code and item name only — so keying the number in by hand found nothing.
+#: Ceiling on barcode-prefix matches folded into one result set.
+BARCODE_SEARCH_MAX_HITS = 12
 
-	Anyone reading the number off a label and typing it should land on the same
-	item as the scanner. Exact match only: a partial number is ambiguous, and
-	silently returning the wrong product at a till is worse than returning none.
 
-	Falls through to the original term for anything that is not a known barcode,
-	so ordinary searching is untouched.
+def _add_barcode_matches(result, search_term, price_list, item_group, pos_profile, erp_get_items):
+	"""Fold items whose POS barcode *contains* the typed digits into ``result``.
+
+	The shelf label encodes ``Item.custom_pos_barcode``, a generated number, not
+	the item code. A scanner resolves it through the standard Item Barcode table,
+	but the POS search box matches item code and item name only — so a cashier
+	reading the number off a label and typing it found nothing.
+
+	Contains rather than starts-with, so someone can key just the last few digits
+	off a label instead of the whole number. Ambiguity is safe here: several hits
+	simply means several tiles, and the cashier picks. (It would not have been
+	safe with ``auto_add_item_to_cart`` on — that is disabled across all
+	profiles.)
+
+	Additive and defensive: whatever ERPNext already found is kept, matches are
+	deduplicated, and any failure returns the untouched original result.
 	"""
 	term = str(search_term or "").strip()
-	if not term or not term.isdigit():
-		return search_term
+	if len(term) < BARCODE_SEARCH_MIN_DIGITS or not term.isdigit():
+		return result
+
+	if not isinstance(result, dict):
+		return result
 
 	try:
 		if not frappe.get_meta("Item").has_field(FIELD_POS_BARCODE):
-			return search_term
-		match = frappe.db.get_value("Item", {FIELD_POS_BARCODE: term}, "name")
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing._resolve_pos_barcode")
-		return search_term
+			return result
 
-	return match or search_term
+		items = result.get("items") or []
+		seen = []
+		for row in items:
+			seen.append(row.get("item_code"))
+
+		codes = frappe.get_all(
+			"Item",
+			filters={FIELD_POS_BARCODE: ["like", "%" + term + "%"], "disabled": 0},
+			pluck="name",
+			limit_page_length=BARCODE_SEARCH_MAX_HITS,
+			order_by=FIELD_POS_BARCODE + " asc",
+		)
+
+		for code in codes:
+			if code in seen:
+				continue
+			extra = erp_get_items(0, 1, price_list, item_group, pos_profile, code) or {}
+			for row in extra.get("items") or []:
+				if row.get("item_code") in seen:
+					continue
+				seen.append(row.get("item_code"))
+				items.append(row)
+
+		result["items"] = items
+	except Exception:
+		# A search convenience must never take the till down.
+		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing._add_barcode_matches")
+
+	return result
 
 
 @frappe.whitelist()
