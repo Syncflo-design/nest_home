@@ -42,7 +42,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	result = erp_get_items(start, page_length, price_list, item_group, pos_profile, search_term)
 
 	result = _add_barcode_matches(
-		result, search_term, price_list, item_group, pos_profile, erp_get_items
+		result, search_term, start, page_length, price_list, item_group, pos_profile, erp_get_items
 	)
 
 	try:
@@ -67,67 +67,73 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 #: item matches, which is noise rather than a search.
 BARCODE_SEARCH_MIN_DIGITS = 3
 
-#: Ceiling on barcode-prefix matches folded into one result set.
-BARCODE_SEARCH_MAX_HITS = 12
 
-
-def _add_barcode_matches(result, search_term, price_list, item_group, pos_profile, erp_get_items):
-	"""Fold items whose POS barcode *contains* the typed digits into ``result``.
+def _add_barcode_matches(result, search_term, start, page_length, price_list, item_group, pos_profile, erp_get_items):
+	"""Search the till's items by POS barcode when ERPNext's own search found none.
 
 	The shelf label encodes ``Item.custom_pos_barcode``, a generated number, not
 	the item code. A scanner resolves it through the standard Item Barcode table,
 	but the POS search box matches item code and item name only — so a cashier
 	reading the number off a label and typing it found nothing.
 
-	Contains rather than starts-with, so someone can key just the last few digits
-	off a label instead of the whole number. Ambiguity is safe here: several hits
-	simply means several tiles, and the cashier picks. (It would not have been
-	safe with ``auto_add_item_to_cart`` on — that is disabled across all
-	profiles.)
+	Ask ERPNext for the till's normal item list, then keep the rows whose barcode
+	contains the typed digits. That reuses ERPNext's own stock, price and profile
+	filtering, so whatever it would have shown is exactly what we search.
 
-	Additive and defensive: whatever ERPNext already found is kept, matches are
-	deduplicated, and any failure returns the untouched original result.
+	Matches anywhere in the number, so the last few digits off a label are enough.
 	"""
 	term = str(search_term or "").strip()
 	if len(term) < BARCODE_SEARCH_MIN_DIGITS or not term.isdigit():
 		return result
 
-	if not isinstance(result, dict):
+	if _items_of(result):
 		return result
 
 	try:
 		if not frappe.get_meta("Item").has_field(FIELD_POS_BARCODE):
 			return result
 
-		items = result.get("items") or []
-		seen = []
-		for row in items:
-			seen.append(row.get("item_code"))
+		rows = _items_of(erp_get_items(start, page_length, price_list, item_group, pos_profile, ""))
+		if not rows:
+			return result
 
-		codes = frappe.get_all(
+		codes = []
+		for row in rows:
+			codes.append(row.get("item_code"))
+
+		barcodes = {}
+		for rec in frappe.get_all(
 			"Item",
-			filters={FIELD_POS_BARCODE: ["like", "%" + term + "%"], "disabled": 0},
-			pluck="name",
-			limit_page_length=BARCODE_SEARCH_MAX_HITS,
-			order_by=FIELD_POS_BARCODE + " asc",
-		)
+			filters={"name": ["in", codes]},
+			fields=["name", FIELD_POS_BARCODE],
+			limit_page_length=0,
+		):
+			barcodes[rec.get("name")] = str(rec.get(FIELD_POS_BARCODE) or "")
 
-		for code in codes:
-			if code in seen:
-				continue
-			extra = erp_get_items(0, 1, price_list, item_group, pos_profile, code) or {}
-			for row in extra.get("items") or []:
-				if row.get("item_code") in seen:
-					continue
-				seen.append(row.get("item_code"))
-				items.append(row)
+		keep = []
+		for row in rows:
+			if term in barcodes.get(row.get("item_code"), ""):
+				keep.append(row)
 
-		result["items"] = items
+		if keep:
+			return {"items": keep}
 	except Exception:
 		# A search convenience must never take the till down.
 		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing._add_barcode_matches")
 
 	return result
+
+
+def _items_of(payload):
+	"""Item rows out of an ERPNext POS get_items payload, whatever shape it took.
+
+	It hands back ``{"items": [...]}`` on a hit and a bare ``[]`` on a miss.
+	"""
+	if isinstance(payload, dict):
+		return payload.get("items") or []
+	if isinstance(payload, list):
+		return list(payload)
+	return []
 
 
 @frappe.whitelist()
