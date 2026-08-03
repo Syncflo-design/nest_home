@@ -39,6 +39,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	signature change upstream can never break this override."""
 	from erpnext.selling.page.point_of_sale.point_of_sale import get_items as erp_get_items
 
+	search_term = _resolve_pos_barcode(search_term)
+
 	result = erp_get_items(start, page_length, price_list, item_group, pos_profile, search_term)
 
 	try:
@@ -57,6 +59,36 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing.get_items")
 
 	return result
+
+
+def _resolve_pos_barcode(search_term):
+	"""Translate a typed POS barcode into the item code the POS can search on.
+
+	The barcode printed on the shelf label is a generated number
+	(``Item.custom_pos_barcode``), not the item code. A scanner resolves it via
+	the standard Item Barcode table, but the POS *search box* matches on item
+	code and item name only — so keying the number in by hand found nothing.
+
+	Anyone reading the number off a label and typing it should land on the same
+	item as the scanner. Exact match only: a partial number is ambiguous, and
+	silently returning the wrong product at a till is worse than returning none.
+
+	Falls through to the original term for anything that is not a known barcode,
+	so ordinary searching is untouched.
+	"""
+	term = str(search_term or "").strip()
+	if not term or not term.isdigit():
+		return search_term
+
+	try:
+		if not frappe.get_meta("Item").has_field(FIELD_POS_BARCODE):
+			return search_term
+		match = frappe.db.get_value("Item", {FIELD_POS_BARCODE: term}, "name")
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "nest_home.pos_pricing._resolve_pos_barcode")
+		return search_term
+
+	return match or search_term
 
 
 @frappe.whitelist()
