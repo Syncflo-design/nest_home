@@ -95,10 +95,18 @@ def get_user_home_page(user):
     get_home_page(), whose result is used as a *website* path on login. Return
     it desk-prefixed so the post-login redirect lands on /desk/<route> instead
     of a bare /<route> that has no Web Page behind it (404).
+
+    Website Users cannot open the desk at all, so they are left to fall through
+    to the standard portal home rather than being sent somewhere that would
+    bounce them straight back to /login.
     """
     try:
         route = _resolve_landing(user)
-        return "desk/{0}".format(route) if route else None
+        if not route:
+            return None
+        if frappe.db.get_value("User", user, "user_type") != "System User":
+            return None
+        return "desk/{0}".format(route)
     except Exception:
         frappe.log_error(frappe.get_traceback(), "nest_home.get_user_home_page")
         return None
