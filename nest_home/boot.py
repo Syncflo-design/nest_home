@@ -89,9 +89,16 @@ def boot_session(bootinfo):
 
 
 def get_user_home_page(user):
-    """Hook entrypoint. Returns a route string, or None to fall through."""
+    """Hook entrypoint. Returns a route string, or None to fall through.
+
+    The landing routes are desk pages, but this hook feeds Frappe's
+    get_home_page(), whose result is used as a *website* path on login. Return
+    it desk-prefixed so the post-login redirect lands on /desk/<route> instead
+    of a bare /<route> that has no Web Page behind it (404).
+    """
     try:
-        return _resolve_landing(user)
+        route = _resolve_landing(user)
+        return "desk/{0}".format(route) if route else None
     except Exception:
         frappe.log_error(frappe.get_traceback(), "nest_home.get_user_home_page")
         return None
