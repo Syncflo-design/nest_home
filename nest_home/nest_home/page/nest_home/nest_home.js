@@ -14,18 +14,24 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.15-2026-06-01-help-discovery';
+	var BUILD_MARKER = 'v0.0.25-2026-09-29-phosphor-icons';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
 	// Cowork ~20KB Write/Edit truncation cap; CSS split from line one).
-	if (!document.getElementById('nest-home-stylesheet')) {
+	// Phosphor icon font (regular + duotone, vendored) is loaded alongside it.
+	[
+		['nest-home-stylesheet', '/assets/nest_home/css/nest_home.css'],
+		['nest-home-phosphor', '/assets/nest_home/vendor/phosphor/regular/style.css'],
+		['nest-home-phosphor-duotone', '/assets/nest_home/vendor/phosphor/duotone/style.css']
+	].forEach(function(css) {
+		if (document.getElementById(css[0])) return;
 		var link = document.createElement('link');
-		link.id = 'nest-home-stylesheet';
+		link.id = css[0];
 		link.rel = 'stylesheet';
-		link.href = '/assets/nest_home/css/nest_home.css';
+		link.href = css[1];
 		document.head.appendChild(link);
-	}
+	});
 
 	wrapper.nestHome = window.nestHome = new NestHome(page, BUILD_MARKER);
 };
@@ -325,12 +331,13 @@ class NestHome {
 		if (window.nestHelp) window.nestHelp.discover($('#nh-tiles'));
 
 		// An uploaded image (icon_image) wins; then a URL/path in `icon`; then a
-		// Font Awesome / Octicon class; otherwise treat `icon` as emoji / text.
+		// Phosphor / Font Awesome / Octicon class; otherwise treat `icon` as text.
 		function nh_tile_icon(t) {
 			if (t.icon_image) return '<img src="' + esc(t.icon_image) + '" alt="">';
 			var ic = t.icon;
-			if (!ic) return '<i class="fa fa-rocket"></i>';
+			if (!ic) return '<i class="ph-duotone ph-rocket-launch"></i>';
 			if (/^https?:|^\//.test(ic)) return '<img src="' + esc(ic) + '" alt="">';
+			if (/^ph(-[a-z]+)? ph-/.test(ic)) return '<i class="' + esc(ic) + '"></i>';
 			if (/octicon|^fa /.test(ic)) return '<i class="' + esc(ic) + '"></i>';
 			return esc(ic);
 		}

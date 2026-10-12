@@ -14,7 +14,7 @@
   {"fieldname": "label", "fieldtype": "Data", "label": "Label", "reqd": 1, "in_list_view": 1, "description": "Text shown on the tile."},
   {"fieldname": "enabled", "fieldtype": "Check", "label": "Enabled", "default": "1", "in_list_view": 1},
   {"fieldname": "column_break_1", "fieldtype": "Column Break"},
-  {"fieldname": "icon", "fieldtype": "Data", "label": "Icon (class or emoji)", "default": "octicon octicon-rocket", "description": "Font Awesome (e.g. 'fa fa-cart-plus') or Octicon class, or an emoji. Ignored if an Icon Image is uploaded."},
+  {"fieldname": "icon", "fieldtype": "Data", "label": "Icon (class)", "default": "ph-duotone ph-rocket-launch", "description": "Phosphor class (e.g. 'ph-duotone ph-truck' or 'ph ph-truck', see phosphoricons.com); Font Awesome / Octicon classes still work. Ignored if an Icon Image is uploaded."},
   {"fieldname": "icon_image", "fieldtype": "Attach Image", "label": "Icon Image", "description": "Optional. Upload a logo/image to use as the tile icon. Takes precedence over the icon class."},
   {"fieldname": "color", "fieldtype": "Data", "label": "Accent Colour", "description": "Optional hex (e.g. #1F4E79). Defaults to the theme primary."},
   {"fieldname": "route_section", "fieldtype": "Section Break", "label": "Target"},
@@ -26,7 +26,7 @@
   {"fieldname": "sort_order", "fieldtype": "Int", "label": "Sort Order", "default": "10", "in_list_view": 1}
  ],
  "links": [],
- "modified": "2026-05-20 00:00:00.000000",
+ "modified": "2026-09-29 08:45:00.000000",
  "module": "Nest Home",
  "name": "Nest Home Tile",
  "owner": "Administrator",

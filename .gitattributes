@@ -5,3 +5,4 @@
 *.gif binary
 *.ico binary
 *.svg text eol=lf
+*.woff2 binary
