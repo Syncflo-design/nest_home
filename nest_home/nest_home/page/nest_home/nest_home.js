@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.27-2026-10-13-no-font-awesome';
+	var BUILD_MARKER = 'v0.0.28-2026-10-13-desk-not-app';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -253,21 +253,20 @@ class NestHome {
 	open_route(route, new_tab) {
 		if (!route) return;
 		route = String(route);
-		// Website/portal routes are absolute paths outside the desk (not under /app);
-		// open them as real page loads instead of pushing them through the desk router.
-		if (route.charAt(0) === '/' && !/^\/app(\/|$|\?|#)/.test(route)) {
+		// Website/portal routes are absolute paths outside the desk (not under /desk or
+		// the old /app); open them as real page loads instead of the desk router.
+		if (route.charAt(0) === '/' && !/^\/(desk|app)(\/|$|\?|#)/.test(route)) {
 			if (new_tab) window.open(route, '_blank');
 			else window.location.href = route;
 			return;
 		}
+		var r = route.replace(/^\/(desk|app)\//, '').replace(/^\//, '');
 		if (new_tab || /^https?:/i.test(route)) {
-			// For relative routes opened in new tab, build the full /app/ URL.
-			var url = /^https?:/i.test(route) ? route
-				: window.location.origin + '/app/' + route.replace(/^\/app\//, '').replace(/^\//, '');
+			// Frappe 16 serves the desk at /desk (the old /app answers Page not found).
+			var url = /^https?:/i.test(route) ? route : window.location.origin + '/desk/' + r;
 			window.open(url, '_blank');
 			return;
 		}
-		var r = route.replace(/^\/app\//, '').replace(/^\//, '');
 		frappe.set_route(r ? r.split('/') : ['']);
 	}
 
