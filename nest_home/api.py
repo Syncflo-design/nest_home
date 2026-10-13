@@ -151,7 +151,8 @@ def lists_for_user(user=None):
             mapped.add("B")
         if getattr(layout, "show_list_c", 0):
             mapped.add("C")
-        return [c for c in _VALID_CATEGORIES if c in mapped] or ["A"]
+        # A layout with every list switched off means exactly that: no lists.
+        return [c for c in _VALID_CATEGORIES if c in mapped]
 
     # No layout -> sensible defaults.
     if _user_roles(user) & _DEFAULT_MANAGER_ROLES:

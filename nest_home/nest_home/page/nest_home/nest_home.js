@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.25-2026-09-29-phosphor-icons';
+	var BUILD_MARKER = 'v0.0.26-2026-10-13-lists-can-be-off';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -275,9 +275,14 @@ class NestHome {
 		return frappe.call({ method: 'nest_home.api.get_landing_context' })
 			.then(function(r) {
 				var ctx = (r && r.message) || {};
-				me.allowed = (ctx.allowed_lists && ctx.allowed_lists.length) ? ctx.allowed_lists : ['A'];
+				// A layout may switch every list off; only a missing answer falls back to List A.
+				me.allowed = Array.isArray(ctx.allowed_lists) ? ctx.allowed_lists : ['A'];
 				me.render_header(ctx);
 				me.render_tiles(ctx.tiles || []);
+				if (!me.allowed.length) {
+					$('.nh-right', me.$main).hide();
+					$('#nh-left').addClass('nh-full');
+				}
 			})
 			.catch(function() { me.allowed = ['A']; });
 	}

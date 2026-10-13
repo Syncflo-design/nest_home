@@ -218,3 +218,8 @@
 .nh-foot-sep { opacity: .5; }
 .nh-support { color: var(--nh-primary); font-size: 12px; font-weight: 600; text-decoration: none; }
 .nh-support:hover { text-decoration: underline; }
+
+/* No attention lists for this layout: the buttons take the whole width. */
+.nh-left.nh-full { flex-basis: 100%; max-width: none; }
+.nh-left.nh-full .nh-tiles { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .nh-left.nh-full .nh-tiles { grid-template-columns: repeat(2, 1fr); } }
