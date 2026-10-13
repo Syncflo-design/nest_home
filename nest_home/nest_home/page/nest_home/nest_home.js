@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.26-2026-10-13-lists-can-be-off';
+	var BUILD_MARKER = 'v0.0.27-2026-10-13-no-font-awesome';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -95,6 +95,27 @@ function nh_sorter(key) {
 	};
 }
 
+// Font Awesome 4 names that tiles were set up with, and the Phosphor glyph for each.
+function nh_fa_to_ph(name) {
+	var map = {
+		'credit-card': 'credit-card', 'calculator': 'calculator', 'truck': 'truck',
+		'cubes': 'cubes', 'cube': 'cube', 'users': 'users', 'user': 'user', 'user-plus': 'user-plus',
+		'file-text-o': 'file-text', 'file-text': 'file-text', 'files-o': 'files', 'book': 'book',
+		'upload': 'upload-simple', 'download': 'download-simple', 'plus-circle': 'plus-circle',
+		'bar-chart': 'chart-bar', 'line-chart': 'chart-line', 'pie-chart': 'chart-pie',
+		'shopping-cart': 'shopping-cart', 'shopping-bag': 'shopping-bag', 'shopping-basket': 'basket',
+		'address-book': 'address-book', 'tags': 'tag', 'tag': 'tag', 'paint-brush': 'paint-brush',
+		'cog': 'gear', 'cogs': 'gears', 'life-ring': 'lifebuoy', 'globe': 'globe', 'industry': 'factory',
+		'tasks': 'list-checks', 'check-square-o': 'check-square', 'check': 'check',
+		'share-square-o': 'share', 'share': 'share', 'home': 'house', 'refresh': 'arrow-clockwise',
+		'search': 'magnifying-glass', 'calendar': 'calendar', 'envelope': 'envelope', 'phone': 'phone',
+		'map-marker': 'map-pin', 'list': 'list', 'table': 'table', 'archive': 'archive', 'print': 'printer',
+		'money': 'money', 'dollar': 'currency-dollar', 'exchange': 'arrows-left-right', 'clock-o': 'clock',
+		'question-circle': 'question', 'info-circle': 'info', 'wrench': 'wrench', 'flask': 'flask'
+	};
+	return map[name] || 'squares-four';
+}
+
 class NestHome {
 
 	constructor(page, build) {
@@ -166,8 +187,8 @@ class NestHome {
 			'      </div>',
 			'      <img class="nh-header-nest" id="nh-header-nest" src="/assets/nest_home/images/nesterp_logo.svg" alt="NestERP" title="NestERP" style="display:none;">',
 			'      <div class="nh-header-actions">',
-			'        <button class="nh-hbtn" id="nh-home" title="Home" aria-label="Home"><i class="fa fa-home"></i></button>',
-			'        <button class="nh-hbtn" id="nh-refresh" title="Refresh" aria-label="Refresh"><i class="fa fa-refresh"></i></button>',
+			'        <button class="nh-hbtn" id="nh-home" title="Home" aria-label="Home"><i class="ph ph-house"></i></button>',
+			'        <button class="nh-hbtn" id="nh-refresh" title="Refresh" aria-label="Refresh"><i class="ph ph-arrow-clockwise"></i></button>',
 			'      </div>',
 			'    </div>',
 			'  </div>',
@@ -336,14 +357,18 @@ class NestHome {
 		if (window.nestHelp) window.nestHelp.discover($('#nh-tiles'));
 
 		// An uploaded image (icon_image) wins; then a URL/path in `icon`; then a
-		// Phosphor / Font Awesome / Octicon class; otherwise treat `icon` as text.
+		// Phosphor class; a Font Awesome name is drawn with the matching Phosphor
+		// glyph (Frappe 16.51 no longer ships Font Awesome on the desk); an Octicon
+		// class is passed through; otherwise `icon` is treated as text.
 		function nh_tile_icon(t) {
 			if (t.icon_image) return '<img src="' + esc(t.icon_image) + '" alt="">';
 			var ic = t.icon;
 			if (!ic) return '<i class="ph-duotone ph-rocket-launch"></i>';
 			if (/^https?:|^\//.test(ic)) return '<img src="' + esc(ic) + '" alt="">';
 			if (/^ph(-[a-z]+)? ph-/.test(ic)) return '<i class="' + esc(ic) + '"></i>';
-			if (/octicon|^fa /.test(ic)) return '<i class="' + esc(ic) + '"></i>';
+			var fa = ic.match(/^fa fa-([a-z0-9-]+)/);
+			if (fa) return '<i class="ph-duotone ph-' + nh_fa_to_ph(fa[1]) + '"></i>';
+			if (/octicon/.test(ic)) return '<i class="' + esc(ic) + '"></i>';
 			return esc(ic);
 		}
 	}
@@ -465,7 +490,7 @@ class NestHome {
 		var m = NH_LIST_META[cat];
 		return [
 			'<div class="nh-empty">',
-			'  <div class="nh-empty-check"><i class="fa fa-check"></i></div>',
+			'  <div class="nh-empty-check"><i class="ph ph-check"></i></div>',
 			'  <div class="nh-empty-title">' + m.empty_title + '</div>',
 			'  <div class="nh-empty-msg">' + m.empty_msg + '</div>',
 			'</div>'
