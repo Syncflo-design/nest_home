@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series", "label", "enabled", "column_break_1", "icon", "icon_image", "color",
-  "route_section", "route", "open_in_new_tab", "description",
+  "route_section", "route", "open_in_new_tab", "count_method", "description",
   "roles_section", "allowed_roles", "sort_order"
  ],
  "fields": [
@@ -20,13 +20,14 @@
   {"fieldname": "route_section", "fieldtype": "Section Break", "label": "Target"},
   {"fieldname": "route", "fieldtype": "Data", "label": "Target Route", "reqd": 1, "in_list_view": 1, "description": "Desk route the tile opens, e.g. 'sales-order/new', 'crm-mobile' or 'sales-order' (no /app or /desk prefix); a website page is an absolute path such as '/guides'."},
   {"fieldname": "open_in_new_tab", "fieldtype": "Check", "label": "Open in New Tab", "default": "0", "description": "When enabled, the tile opens the route in a new browser tab instead of navigating within the desk."},
+  {"fieldname": "count_method", "fieldtype": "Data", "label": "Count Method", "description": "Optional. A whitelisted method that returns a number for the person signed in (e.g. 'nest_stock_request.api.issue_count'). Shown as a badge on the tile while it is above 0."},
 {"fieldname": "description", "fieldtype": "Small Text", "label": "Description", "description": "Optional sub-label shown under the tile title."},
   {"fieldname": "roles_section", "fieldtype": "Section Break", "label": "Visibility & Order"},
   {"fieldname": "allowed_roles", "fieldtype": "Table", "label": "Allowed Roles", "options": "Nest Home Tile Role", "description": "Leave empty to show the tile to everyone."},
   {"fieldname": "sort_order", "fieldtype": "Int", "label": "Sort Order", "default": "10", "in_list_view": 1}
  ],
  "links": [],
- "modified": "2026-09-29 08:45:00.000000",
+ "modified": "2026-10-27 16:00:00.000000",
  "module": "Nest Home",
  "name": "Nest Home Tile",
  "owner": "Administrator",

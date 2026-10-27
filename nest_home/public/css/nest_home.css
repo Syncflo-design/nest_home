@@ -91,6 +91,11 @@
 }
 .nh-tile-icon img { height: 24px; width: auto; }
 .nh-tile-label { font-size: 14px; font-weight: 650; line-height: 1.25; }
+.nh-tile-count {
+  display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px;
+  border-radius: 10px; background: #d64545; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 20px; text-align: center; vertical-align: 1px;
+}
 .nh-tile-icon-img { line-height: 0; }
 .nh-tile-icon-img img { height: 34px; width: auto; max-width: 100%; border-radius: 6px; object-fit: contain; }
 

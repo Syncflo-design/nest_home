@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.28-2026-10-13-desk-not-app';
+	var BUILD_MARKER = 'v0.0.29-2026-10-27-tile-counts';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -344,7 +344,7 @@ class NestHome {
 			var icon_cls = t.icon_image ? 'nh-tile-icon nh-tile-icon-img' : 'nh-tile-icon';
 			var help_slug = esc(t.label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
 			return [
-				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '"' + (t.open_in_new_tab ? ' data-newtab="1"' : '') + ' data-help="' + help_slug + '">',
+				'<div class="nh-tile"' + accent + ' data-route="' + esc(t.route || '') + '"' + (t.open_in_new_tab ? ' data-newtab="1"' : '') + (t.count_method ? ' data-count="' + esc(t.count_method) + '"' : '') + ' data-help="' + help_slug + '">',
 				'  <div class="' + icon_cls + '">' + icon + '</div>',
 				'  <div class="nh-tile-label">' + esc(t.label || '') + '</div>',
 				'</div>'
@@ -352,6 +352,7 @@ class NestHome {
 		}).join('\n');
 		$('#nh-tiles').html(html);
 		$('#nh-left').show();
+		this.load_counts();
 		// If nest_help app is installed, auto-discover help badges for tiles.
 		if (window.nestHelp) window.nestHelp.discover($('#nh-tiles'));
 
@@ -500,6 +501,20 @@ class NestHome {
 
 	refresh() {
 		this.load_visible();
+		this.load_counts();
+	}
+
+	// A tile with a Count Method shows that number as a badge while it is above 0
+	// (e.g. stock requests waiting to be issued).
+	load_counts() {
+		$('#nh-tiles .nh-tile[data-count]').each(function() {
+			var $tile = $(this);
+			frappe.call({ method: $tile.attr('data-count') }).then(function(r) {
+				var n = cint(r && r.message);
+				$tile.find('.nh-tile-count').remove();
+				if (n > 0) $tile.find('.nh-tile-label').append(' <span class="nh-tile-count">' + n + '</span>');
+			});
+		});
 	}
 
 	start_poll() {

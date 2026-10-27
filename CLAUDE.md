@@ -122,3 +122,12 @@ role_home_page still covers managers. Record the answer here after smoke test.
   prices; this override stops it recurring for anything else.
 - **Deploy**: bundles with the pending `nest_help` v0.0.2 POS-crash shim. Push →
   Frappe Cloud bench `Ardmore_KZN` → Pull Updates → **fresh Deploy** (asset+code).
+
+## v0.0.29 - 2026-10-27: tile count badges
+
+- `Nest Home Tile.count_method` (Data): a whitelisted method returning a number for the session
+  user; the page shows it as a red badge after the tile label while it is above 0. Loaded with the
+  tiles and on every refresh / 2-min poll (`load_counts` in nest_home.js).
+- First use (Ardmore): Issue Stock -> `nest_stock_request.api.issue_count` (requests waiting to be
+  issued), Request Stock -> `nest_stock_request.api.receive_count` (stock waiting to be received),
+  both added in nest_stock_request 0.2.1. Set on the tile records after deploy.
