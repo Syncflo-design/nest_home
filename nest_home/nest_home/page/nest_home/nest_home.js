@@ -14,14 +14,15 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.30-2026-10-27-count-badge';
+	var BUILD_MARKER = 'v0.0.31-2026-10-27-css-cache-bust';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
 	// Cowork ~20KB Write/Edit truncation cap; CSS split from line one).
 	// Phosphor icon font (regular + duotone, vendored) is loaded alongside it.
 	[
-		['nest-home-stylesheet', '/assets/nest_home/css/nest_home.css'],
+		// ?v= the build marker, so each deploy loads the new stylesheet instead of a cached one
+		['nest-home-stylesheet', '/assets/nest_home/css/nest_home.css?v=' + encodeURIComponent(BUILD_MARKER)],
 		['nest-home-phosphor', '/assets/nest_home/vendor/phosphor/regular/style.css'],
 		['nest-home-phosphor-duotone', '/assets/nest_home/vendor/phosphor/duotone/style.css']
 	].forEach(function(css) {
