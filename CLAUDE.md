@@ -126,7 +126,7 @@ role_home_page still covers managers. Record the answer here after smoke test.
 ## v0.0.29 - 2026-10-27: tile count badges
 
 - `Nest Home Tile.count_method` (Data): a whitelisted method returning a number for the session
-  user; the page shows it as a red badge after the tile label while it is above 0. Loaded with the
+  user; the page shows it as a red circular badge on the tile icon (top-right) while it is above 0; v0.0.30 restyled it from an inline pill. Loaded with the
   tiles and on every refresh / 2-min poll (`load_counts` in nest_home.js).
 - First use (Ardmore): Issue Stock -> `nest_stock_request.api.issue_count` (requests waiting to be
   issued), Request Stock -> `nest_stock_request.api.receive_count` (stock waiting to be received),

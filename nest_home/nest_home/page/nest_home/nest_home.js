@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.29-2026-10-27-tile-counts';
+	var BUILD_MARKER = 'v0.0.30-2026-10-27-count-badge';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -504,15 +504,20 @@ class NestHome {
 		this.load_counts();
 	}
 
-	// A tile with a Count Method shows that number as a badge while it is above 0
-	// (e.g. stock requests waiting to be issued).
+	// A tile with a Count Method shows that number as a red badge on its icon while it
+	// is above 0 (e.g. stock requests waiting to be issued). An existing badge is updated
+	// in place so the poll does not replay its entrance.
 	load_counts() {
 		$('#nh-tiles .nh-tile[data-count]').each(function() {
 			var $tile = $(this);
 			frappe.call({ method: $tile.attr('data-count') }).then(function(r) {
 				var n = cint(r && r.message);
-				$tile.find('.nh-tile-count').remove();
-				if (n > 0) $tile.find('.nh-tile-label').append(' <span class="nh-tile-count">' + n + '</span>');
+				var $icon = $tile.find('.nh-tile-icon');
+				var $badge = $icon.find('.nh-tile-count');
+				if (n <= 0) { $badge.remove(); return; }
+				if (!$badge.length) $badge = $('<span class="nh-tile-count"></span>').appendTo($icon);
+				var label = __('{0} waiting', [n]);
+				$badge.text(n > 99 ? '99+' : String(n)).attr({ title: label, 'aria-label': label, role: 'status' });
 			});
 		});
 	}
