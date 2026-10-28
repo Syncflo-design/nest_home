@@ -57,6 +57,14 @@
 }
 .nh-hbtn:hover { background: rgba(255,255,255,0.30); transform: translateY(-1px); }
 .nh-hbtn:active { transform: translateY(0); }
+/* A tile shown as a header icon (Tile > Show As): solid accent colour, badges on the corner */
+#nh-hicons { display: inline-flex; align-items: center; gap: 8px; }
+.nh-hicon { position: relative; background: var(--nh-tile-accent, rgba(255,255,255,0.15)); border-color: rgba(255,255,255,0.45); }
+.nh-hicon:hover { background: var(--nh-tile-accent, rgba(255,255,255,0.30)); filter: brightness(1.12); }
+.nh-hicon img { height: 18px; width: auto; }
+.nh-hicon .nh-tile-count { top: -8px; left: auto; right: -8px; box-shadow: 0 0 0 2px rgba(255,255,255,0.9); animation: none; }
+.nh-hicon .nh-tile-counts { top: -8px; left: auto; right: -8px; }
+.nh-hicon .nh-pill { border: 1px solid rgba(255,255,255,0.9); }
 
 /* ---- Horizontal body: left button column + right lists ------------------ */
 .nh-body { display: flex; gap: 22px; align-items: flex-start; }
@@ -108,6 +116,17 @@
   to   { transform: scale(1);   opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .nh-tile-count { animation: none; } }
+/* Several counts at once ({counts: [...]}): one coloured pill per entry, same corner */
+.nh-tile-counts {
+  position: absolute; top: -9px; left: calc(100% - 7px); display: flex; gap: 3px;
+}
+.nh-pill {
+  min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 999px;
+  background: var(--nh-tile-accent, var(--nh-primary)); color: #fff;
+  font-size: 11px; font-weight: 700; line-height: 20px; text-align: center;
+  font-variant-numeric: tabular-nums; box-shadow: 0 0 0 2px var(--nh-card);
+}
+.nh-pill-zero { opacity: .4; }
 .nh-tile-icon-img { line-height: 0; }
 .nh-tile-icon-img img { height: 34px; width: auto; max-width: 100%; border-radius: 6px; object-fit: contain; }
 

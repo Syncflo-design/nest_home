@@ -170,7 +170,8 @@ def _tile_payload(doc):
         "description": getattr(doc, "description", None) or "",
         "sort_order": doc.sort_order or 0,
         "open_in_new_tab": bool(getattr(doc, "open_in_new_tab", 0)),
-        "count_method": getattr(doc, "count_method", None) or "",
+        "count_method": (getattr(doc, "count_method", None) or "").strip(),
+        "placement": getattr(doc, "placement", None) or "Tile",
     }
 
 

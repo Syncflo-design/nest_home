@@ -131,3 +131,18 @@ role_home_page still covers managers. Record the answer here after smoke test.
 - First use (Ardmore): Issue Stock -> `nest_stock_request.api.issue_count` (requests waiting to be
   issued), Request Stock -> `nest_stock_request.api.receive_count` (stock waiting to be received),
   both added in nest_stock_request 0.2.1. Set on the tile records after deploy.
+
+## v0.0.32 - 2026-10-28: header icons + multi-count pills (merged with 0.0.29-0.0.31 from the laptop)
+
+- `Nest Home Tile.placement` Select "Tile / Header icon". A header-icon tile is drawn by
+  `render_tiles` into `#nh-hicons` as a round `.nh-hbtn .nh-hicon` button next to Home /
+  Refresh (label = tooltip, accent = button colour) and leaves the tile grid. Click handling
+  is shared (`.nh-tile, .nh-hicon`). First use: nest_support's "Log Support Ticket" +
+  "Support Tickets" (Russell: icons in the header bar, not tiles).
+- `count_method` now accepts two answers (one `load_counts`, tiles and header icons alike):
+  a number -> the red badge from 0.0.30 while above 0; `{"counts": [{value, color, title}]}`
+  -> one coloured pill per entry (`.nh-tile-counts` / `.nh-pill`, zero faded). First multi
+  use: nesterp "Tickets" icon with Server Script API `hd_ticket_tile_counts` (orange
+  unallocated / green mine). Set `count_method` / `placement` on the records after deploy.
+- BUILD_MARKER -> `v0.0.32-2026-10-28-header-icons-multi-counts`; `__version__` -> 0.0.32.
+

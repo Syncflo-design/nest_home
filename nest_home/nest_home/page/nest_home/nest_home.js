@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.31-2026-10-27-css-cache-bust';
+	var BUILD_MARKER = 'v0.0.32-2026-10-28-header-icons-multi-counts';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -188,6 +188,7 @@ class NestHome {
 			'      </div>',
 			'      <img class="nh-header-nest" id="nh-header-nest" src="/assets/nest_home/images/nesterp_logo.svg" alt="NestERP" title="NestERP" style="display:none;">',
 			'      <div class="nh-header-actions">',
+			'        <span id="nh-hicons"></span>',
 			'        <button class="nh-hbtn" id="nh-home" title="Home" aria-label="Home"><i class="ph ph-house"></i></button>',
 			'        <button class="nh-hbtn" id="nh-refresh" title="Refresh" aria-label="Refresh"><i class="ph ph-arrow-clockwise"></i></button>',
 			'      </div>',
@@ -230,8 +231,8 @@ class NestHome {
 				if (Array.isArray(route)) frappe.set_route.apply(frappe, route);
 			}
 		});
-		// Quick-launch tile → navigate to its route.
-		this.$main.on('click', '.nh-tile', function() {
+		// Quick-launch tile (or a header icon drawn from a tile) → navigate to its route.
+		this.$main.on('click', '.nh-tile, .nh-hicon', function() {
 			me.open_route($(this).data('route'), $(this).data('newtab'));
 		});
 		// Header controls.
@@ -335,10 +336,22 @@ class NestHome {
 	}
 
 	render_tiles(tiles) {
+		var esc = frappe.utils.escape_html;
+		tiles = tiles || [];
+		// Tiles marked "Header icon" become round buttons next to Home / Refresh
+		// (label = tooltip, accent = button colour, count pills sit on the corner).
+		var icons = tiles.filter(function(t) { return t.placement === 'Header icon'; });
+		tiles = tiles.filter(function(t) { return t.placement !== 'Header icon'; });
+		$('#nh-hicons').html(icons.map(function(t) {
+			var accent = t.color ? (' style="--nh-tile-accent:' + esc(t.color) + ';"') : '';
+			return '<button class="nh-hbtn nh-hicon"' + accent + ' data-route="' + esc(t.route || '') + '"' +
+				(t.open_in_new_tab ? ' data-newtab="1"' : '') + (t.count_method ? ' data-count="' + esc(t.count_method) + '"' : '') +
+				' title="' + esc(t.label || '') + '" aria-label="' + esc(t.label || '') + '">' +
+				nh_tile_icon(t) + '</button>';
+		}).join(''));
 		// No buttons → hide the left column entirely so the lists take the full
 		// width of the screen.
-		if (!tiles || !tiles.length) { $('#nh-left').hide(); return; }
-		var esc = frappe.utils.escape_html;
+		if (!tiles.length) { $('#nh-left').hide(); this.load_counts(); return; }
 		var html = tiles.map(function(t) {
 			var accent = t.color ? (' style="--nh-tile-accent:' + esc(t.color) + ';"') : '';
 			var icon = nh_tile_icon(t);
@@ -505,21 +518,36 @@ class NestHome {
 		this.load_counts();
 	}
 
-	// A tile with a Count Method shows that number as a red badge on its icon while it
-	// is above 0 (e.g. stock requests waiting to be issued). An existing badge is updated
-	// in place so the poll does not replay its entrance.
+	// A tile (or header icon) with a Count Method shows what the method answers, on the
+	// icon's top-right corner, on first paint and on every refresh / 2-min poll:
+	//   - a number            → one red badge while it is above 0 (stock requests waiting)
+	//   - {counts: [{value, color, title}, ...]} → one coloured pill per entry, zero faded
+	//     (the Tickets icon: orange unallocated, green mine)
+	// Badges are updated in place so the poll does not replay the entrance animation.
 	load_counts() {
-		$('#nh-tiles .nh-tile[data-count]').each(function() {
+		var esc = frappe.utils.escape_html;
+		$('#nh-tiles .nh-tile[data-count], #nh-hicons .nh-hicon[data-count]').each(function() {
 			var $tile = $(this);
+			var $host = $tile.hasClass('nh-hicon') ? $tile : $tile.find('.nh-tile-icon');
 			frappe.call({ method: $tile.attr('data-count') }).then(function(r) {
-				var n = cint(r && r.message);
-				var $icon = $tile.find('.nh-tile-icon');
-				var $badge = $icon.find('.nh-tile-count');
+				var m = r && r.message;
+				if (m && typeof m === 'object' && Array.isArray(m.counts)) {
+					var $box = $host.find('.nh-tile-counts');
+					if (!$box.length) $box = $('<span class="nh-tile-counts"></span>').appendTo($host);
+					$box.html(m.counts.map(function(c) {
+						var v = cint(c.value);
+						var style = c.color ? (' style="background:' + esc(c.color) + ';"') : '';
+						return '<span class="nh-pill' + (v ? '' : ' nh-pill-zero') + '"' + style + ' title="' + esc(c.title || '') + '" role="status">' + (v > 99 ? '99+' : v) + '</span>';
+					}).join(''));
+					return;
+				}
+				var n = cint(m);
+				var $badge = $host.find('.nh-tile-count');
 				if (n <= 0) { $badge.remove(); return; }
-				if (!$badge.length) $badge = $('<span class="nh-tile-count"></span>').appendTo($icon);
+				if (!$badge.length) $badge = $('<span class="nh-tile-count"></span>').appendTo($host);
 				var label = __('{0} waiting', [n]);
 				$badge.text(n > 99 ? '99+' : String(n)).attr({ title: label, 'aria-label': label, role: 'status' });
-			});
+			}).catch(function() {});
 		});
 	}
 
