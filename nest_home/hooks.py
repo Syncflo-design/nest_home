@@ -3,7 +3,7 @@ app_title       = "Nest Home"
 app_publisher   = "NestERP / Syncflo"
 app_description = "Role-based, branded landing page with a push-not-pull attention engine and data-driven quick-launch tiles."
 app_email       = "ops@syncflo.co.za"
-app_license     = "MIT"
+app_license     = "Proprietary"
 app_icon        = "octicon octicon-home"
 
 # ---------------------------------------------------------------------------
