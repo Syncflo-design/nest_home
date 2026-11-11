@@ -6,7 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "layout_name", "enabled", "priority", "cb_top",
+  "layout_name", "enabled", "priority", "landing_route", "cb_top",
   "applies_to", "role_profile", "role",
   "lists_section", "lists_help", "show_list_a", "show_list_b", "show_list_c",
   "greeting_section", "greeting",
@@ -16,6 +16,7 @@
   {"fieldname": "layout_name", "fieldtype": "Data", "label": "Layout Name", "reqd": 1, "unique": 1, "in_list_view": 1, "description": "A friendly name, e.g. 'Presales' or 'Sales Manager'."},
   {"fieldname": "enabled", "fieldtype": "Check", "label": "Enabled", "default": "1", "in_list_view": 1},
   {"fieldname": "priority", "fieldtype": "Int", "label": "Priority", "default": "0", "description": "When a user matches more than one layout, the highest priority wins."},
+  {"fieldname": "landing_route", "fieldtype": "Data", "label": "Landing Page (optional)", "description": "Open this desk page at login and on the Home button instead of Nest Home, e.g. <code>query-report/Project Tracker</code>. Leave blank for Nest Home."},
   {"fieldname": "cb_top", "fieldtype": "Column Break"},
   {"fieldname": "applies_to", "fieldtype": "Select", "label": "Applies To", "options": "Role\nRole Profile", "default": "Role", "reqd": 1, "in_list_view": 1, "description": "Attach this layout to a single Role, or to a whole Role Profile."},
   {"fieldname": "role", "fieldtype": "Link", "label": "Role", "options": "Role", "depends_on": "eval:doc.applies_to=='Role'", "mandatory_depends_on": "eval:doc.applies_to=='Role'", "in_list_view": 1},
@@ -32,7 +33,7 @@
   {"fieldname": "tiles", "fieldtype": "Table", "label": "Buttons", "options": "Nest Home Layout Tile"}
  ],
  "links": [],
- "modified": "2026-05-21 00:00:00.000000",
+ "modified": "2026-11-11 14:00:00.000000",
  "module": "Nest Home",
  "name": "Nest Home Layout",
  "owner": "Administrator",

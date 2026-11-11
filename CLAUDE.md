@@ -146,3 +146,14 @@ role_home_page still covers managers. Record the answer here after smoke test.
   unallocated / green mine). Set `count_method` / `placement` on the records after deploy.
 - BUILD_MARKER -> `v0.0.32-2026-10-28-header-icons-multi-counts`; `__version__` -> 0.0.32.
 
+
+## v0.0.33 - 2026-11-11: per-layout Landing Page
+
+- `Nest Home Layout.landing_route` (Data, optional): users matching the layout land on that desk
+  route at login and on the Home button instead of nest-home (`boot._resolve_landing` step 2,
+  `_clean_route` strips a leading `/`, `desk/` or `app/`). Blank = nest-home as before. Use a
+  literal space in the route (`query-report/Project Tracker`), never `%20` - frappe.set_route
+  encodes it (same trap as tile routes).
+- First use (nesterp): layout "Implementation Partner" -> `query-report/Project Tracker`, so
+  partners open straight on the tracker. Set on the record after deploy.
+- No page-bundle change, so BUILD_MARKER is unchanged; `__version__` -> 0.0.33.

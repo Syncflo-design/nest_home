@@ -7,7 +7,7 @@ their Role Profile or Role -- if they don't, they are left on the standard desk.
 
 Precedence:
     1. the user's own Preferred Landing Page  (if overrides are allowed)
-    2. nest-home                               (ONLY if a layout matches them)
+    2. nest-home, or the layout's Landing Page (ONLY if a layout matches them)
     3. the app default                         (Nest Home Settings.default_landing)
 
 get_user_home_page is wired as the get_website_user_home_page hook; despite the
@@ -42,6 +42,16 @@ def _route_for_label(label):
     return route or None  # "" or None -> None (standard desk)
 
 
+def _clean_route(route):
+    """Layout Landing Page -> bare desk route. Accepts 'query-report/X',
+    '/desk/query-report/X' or '/app/query-report/X'. Blank -> None."""
+    route = (route or "").strip().strip("/")
+    for prefix in ("desk/", "app/"):
+        if route.startswith(prefix):
+            route = route[len(prefix):]
+    return route or None
+
+
 def _resolve_landing(user):
     if not user or user == "Guest":
         return None
@@ -60,11 +70,13 @@ def _resolve_landing(user):
         if pref:
             return _route_for_label(pref)
 
-    # 2. nest-home, but ONLY if a layout actually matches this user.
+    # 2. nest-home (or the layout's own Landing Page), but ONLY if a layout
+    #    actually matches this user.
     try:
-        from nest_home.api import user_has_layout
-        if user_has_layout(user):
-            return "nest-home"
+        from nest_home.api import resolve_layout
+        layout = resolve_layout(user)
+        if layout:
+            return _clean_route(getattr(layout, "landing_route", None)) or "nest-home"
     except Exception:
         pass
 
