@@ -29,6 +29,26 @@ frappe.provide("nest_home");
 		}
 	}
 
+	// The desk renders an empty route (the breadcrumb Home icon links to /desk) by
+	// loading a desk *Page* named frappe.boot.home_page. A layout Landing Page that
+	// is a route (e.g. query-report/Project Tracker) is not a Page, so send the
+	// empty route straight to it instead of asking the server for that Page (403).
+	function patch_home_render() {
+		var pv = frappe.views && frappe.views.pageview;
+		if (!pv || pv.nest_home_patched) return;
+		var original = pv.show;
+		pv.show = function (name) {
+			var t = target();
+			if (!name && t && t.indexOf("/") !== -1) {
+				frappe.set_route(t);
+				return;
+			}
+			return original.apply(this, arguments);
+		};
+		pv.nest_home_patched = true;
+	}
+	patch_home_render();
+
 	function bind_router() {
 		if (frappe.router && frappe.router.on) {
 			// Fires on every route change — catches the Home/house button.
@@ -40,6 +60,7 @@ frappe.provide("nest_home");
 
 	// Initial landing (router may already be settled by the time we run).
 	$(document).on("app_ready", function () {
+		patch_home_render();
 		redirect_if_home();
 		bind_router();
 	});

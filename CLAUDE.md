@@ -157,3 +157,13 @@ role_home_page still covers managers. Record the answer here after smoke test.
 - First use (nesterp): layout "Implementation Partner" -> `query-report/Project Tracker`, so
   partners open straight on the tracker. Set on the record after deploy.
 - No page-bundle change, so BUILD_MARKER is unchanged; `__version__` -> 0.0.33.
+
+## v0.0.34 - 2026-11-11: route landings and the Home icon
+
+- The breadcrumb Home icon links to `/desk`; the desk renders an empty route via
+  `frappe.views.pageview.show("")`, which loads a desk **Page** named `frappe.boot.home_page`.
+  A route landing (`query-report/Project Tracker`) is not a Page, so getpage 403'd ("does not
+  have doctype access ... Page"). Fix: `boot_session` only puts single-segment Page landings
+  (nest-home) in `home_page`; `nest_home_redirect.js` wraps `pageview.show` so an empty route
+  with a route landing goes straight to it (`frappe.set_route`). Page landings unchanged.
+- `__version__` -> 0.0.34 (redirect JS is an app_include asset, rebuilt by a fresh Deploy).

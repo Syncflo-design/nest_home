@@ -94,8 +94,12 @@ def boot_session(bootinfo):
         if landing:
             bootinfo["nest_home_landing"] = landing
             # Make the desk Home/house button land here too (it normally
-            # points at the default workspace).
-            bootinfo["home_page"] = landing
+            # points at the default workspace). The desk treats home_page as a
+            # Page name, so only a single desk Page (nest-home) goes here; a
+            # route landing (query-report/...) is handled by
+            # nest_home_redirect.js instead.
+            if "/" not in landing:
+                bootinfo["home_page"] = landing
     except Exception:
         pass
 
