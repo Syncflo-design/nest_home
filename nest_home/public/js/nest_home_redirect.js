@@ -72,3 +72,60 @@ frappe.provide("nest_home");
 	setTimeout(function () { redirect_if_home(); bind_router(); }, 800);
 	setTimeout(redirect_if_home, 2000);
 })();
+
+// One-click Home in the page title bar, in front of the page title, on every
+// desk page (forms, lists, reports, workspaces). They all build their header in
+// frappe.ui.Page.make, so we wrap that; pages built before this file ran are
+// covered on app_ready. The button goes to the user's own landing from boot.py
+// (nest-home, or a layout's route Landing Page, which boot keeps out of
+// home_page), otherwise to Frappe's own home_page.
+(function () {
+	var CLS = "nest-home-btn";
+
+	function go_home() {
+		frappe.set_route(frappe.boot.nest_home_landing || frappe.boot.home_page || "");
+	}
+
+	function add_style() {
+		if (document.getElementById("nest-home-btn-style")) return;
+		$("<style id='nest-home-btn-style'></style>").text([
+			".page-title ." + CLS + "{display:flex;align-items:center;justify-content:center;",
+			"flex-shrink:0;width:28px;height:28px;margin-right:var(--margin-sm);",
+			"border-radius:var(--border-radius-md);cursor:pointer;--icon-stroke:var(--gray-700)}",
+			".page-title ." + CLS + ":hover{background:var(--fg-hover-color)}",
+			"[data-theme=dark] .page-title ." + CLS + "{--icon-stroke:var(--gray-300)}"
+		].join("")).appendTo("head");
+	}
+
+	function add_home_buttons(root) {
+		try {
+			$(root).find(".page-head .page-title").each(function () {
+				var $title = $(this);
+				if ($title.children("." + CLS).length) return;
+				add_style();
+				var $btn = $("<button type='button' class='btn-reset " + CLS + "'></button>")
+					.attr({ title: __("Home"), "aria-label": __("Home") })
+					.html(frappe.utils.icon("house", "md"))
+					.on("click", go_home);
+				var $toggle = $title.children(".sidebar-toggle-btn").first();
+				if ($toggle.length) $btn.insertAfter($toggle);
+				else $btn.prependTo($title);
+			});
+		} catch (e) {
+			/* never break the desk */
+		}
+	}
+
+	if (frappe.ui.Page && frappe.ui.Page.prototype.make) {
+		var make = frappe.ui.Page.prototype.make;
+		frappe.ui.Page.prototype.make = function () {
+			var result = make.apply(this, arguments);
+			add_home_buttons(this.wrapper);
+			return result;
+		};
+	}
+
+	$(document).on("app_ready", function () {
+		add_home_buttons(document.body);
+	});
+})();

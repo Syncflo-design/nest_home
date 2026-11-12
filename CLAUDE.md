@@ -202,3 +202,15 @@ role_home_page still covers managers. Record the answer here after smoke test.
   `at_desk_root()`; the `pageview.show` wrap for route landings also only redirects there and
   otherwise does nothing for the passing empty route. Bare /desk still goes to the landing.
 - Redirect JS is a plain app_include asset (no hash): browsers may need a hard refresh once.
+
+## v0.0.38 - 2026-11-12: one-click Home in every page header
+
+- `public/js/nest_home_redirect.js` wraps `frappe.ui.Page.prototype.make` and puts a house
+  button (Frappe sprite `house`, Lucide) in `.page-title`, after the mobile sidebar toggle,
+  so it sits in front of the title on every form, list, report and workspace. Click =
+  `frappe.set_route(frappe.boot.nest_home_landing || frappe.boot.home_page || "")`: the user's
+  own landing (nest-home, or the layout's route Landing Page from 0.0.33), else Frappe's home.
+  `home_page` alone is not enough since 0.0.34 keeps route landings out of it. The nest-home
+  page hides the desk page-head, so the button never shows there. Styles are injected once
+  (`#nest-home-btn-style`); no CSS bundle. Replaced an uncommitted sidebar "Home" item.
+- `__version__` -> 0.0.38. BUILD_MARKER unchanged (page bundle not touched).
