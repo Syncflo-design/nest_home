@@ -191,3 +191,14 @@ role_home_page still covers managers. Record the answer here after smoke test.
   carries B/C checkboxes; nothing reads it.
 - nesterp layouts Administrator, Administrator Profile and PreSales had only B+C on; set to My
   Activities. BUILD_MARKER -> `v0.0.36-2026-11-12-my-activities-only`; `__version__` -> 0.0.36.
+
+## v0.0.37 - 2026-11-12: direct links stopped bouncing (Frappe 16.56)
+
+- After nesterp/Com-Struct moved to Frappe 16.56, every full page load of a desk link (bookmark,
+  email link, refresh) landed on the user's landing page: `frappe.get_route()` reads empty for a
+  moment while a deep link settles, and `redirect_if_home` (router change + 800/2000 ms timers)
+  acted on it. Proven on nesterp: with the landing switched off for one user the same link opened.
+- Fix (`nest_home_redirect.js`): "home" = the address bar is the bare desk (`/desk`, `/app`), via
+  `at_desk_root()`; the `pageview.show` wrap for route landings also only redirects there and
+  otherwise does nothing for the passing empty route. Bare /desk still goes to the landing.
+- Redirect JS is a plain app_include asset (no hash): browsers may need a hard refresh once.

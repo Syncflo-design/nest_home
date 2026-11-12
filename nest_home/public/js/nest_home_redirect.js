@@ -14,16 +14,19 @@ frappe.provide("nest_home");
 		return frappe.boot && frappe.boot.nest_home_landing;
 	}
 
+	// "Home" is the bare desk address (/desk, or the old /app), read from the address
+	// bar. frappe.get_route() is not enough: from Frappe 16.56 it briefly reads empty
+	// while a full page load settles a deep link, which bounced every bookmark, email
+	// link and refresh to the landing page.
+	function at_desk_root() {
+		var p = (window.location.pathname || "").replace(/\/+$/, "");
+		return p === "/desk" || p === "/app";
+	}
+
 	function redirect_if_home() {
 		try {
 			var t = target();
-			if (!t) return;
-			var r = frappe.get_route() || [];
-			// Empty route == the desk's home landing.
-			var is_home = r.length === 0 || (r.length === 1 && (r[0] === "" || r[0] == null));
-			if (is_home && (r[0] || "") !== t) {
-				frappe.set_route(t);
-			}
+			if (t && at_desk_root()) frappe.set_route(t);
 		} catch (e) {
 			/* never break the desk */
 		}
@@ -40,7 +43,8 @@ frappe.provide("nest_home");
 		pv.show = function (name) {
 			var t = target();
 			if (!name && t && t.indexOf("/") !== -1) {
-				frappe.set_route(t);
+				// Off the desk root an empty route is only a passing state on load.
+				if (at_desk_root()) frappe.set_route(t);
 				return;
 			}
 			return original.apply(this, arguments);
