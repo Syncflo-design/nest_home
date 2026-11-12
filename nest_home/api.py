@@ -160,6 +160,15 @@ def lists_for_user(user=None):
     return ["A"]
 
 
+def custom_list_for(layout):
+    """The layout's own list: {title, method} when it names a List Method, else None.
+    The page calls the method (any app's whitelisted function) and renders its rows."""
+    method = (getattr(layout, "list_method", None) or "").strip() if layout else ""
+    if not method:
+        return None
+    return {"title": (getattr(layout, "list_title", None) or "").strip() or "My List", "method": method}
+
+
 def _tile_payload(doc):
     return {
         "label": doc.label,
@@ -301,6 +310,7 @@ def get_landing_context():
         "user": user,
         "user_fullname": frappe.utils.get_fullname(user),
         "allowed_lists": lists_for_user(user),
+        "custom_list": custom_list_for(layout),
         "logo_url": _logo_url(),
         "app_title": (getattr(s, "app_title", None) if s else None) or "Nest Home",
         "tiles": tiles_for_user(user),

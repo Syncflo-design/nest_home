@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.32-2026-10-28-header-icons-multi-counts';
+	var BUILD_MARKER = 'v0.0.35-2026-11-12-layout-list';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -229,6 +229,7 @@ class NestHome {
 			if (route) {
 				try { route = JSON.parse(decodeURIComponent(route)); } catch (e) {}
 				if (Array.isArray(route)) frappe.set_route.apply(frappe, route);
+				else me.open_route(route);
 			}
 		});
 		// Quick-launch tile (or a header icon drawn from a tile) → navigate to its route.
@@ -286,6 +287,7 @@ class NestHome {
 	// Load whatever lists this user is allowed to see, List A first so login
 	// feels instant, then the rest behind it.
 	load_visible() {
+		if (this.custom) this.load_custom();
 		if (!this.allowed || !this.allowed.length) return;
 		if (this.allowed.indexOf('A') >= 0) this.load_category('A');
 		var rest = this.allowed.filter(function(c) { return c !== 'A'; });
@@ -299,9 +301,15 @@ class NestHome {
 				var ctx = (r && r.message) || {};
 				// A layout may switch every list off; only a missing answer falls back to List A.
 				me.allowed = Array.isArray(ctx.allowed_lists) ? ctx.allowed_lists : ['A'];
+				// The layout's own list (from another app's method) shows first, as list L.
+				me.custom = (ctx.custom_list && ctx.custom_list.method) ? ctx.custom_list : null;
+				if (me.custom) {
+					NH_LIST_META.L = { title: frappe.utils.escape_html(me.custom.title), sub: '', dot: 'nh-dot-B',
+						empty_title: 'Nothing waiting', empty_msg: 'Nothing needs you right now.' };
+				}
 				me.render_header(ctx);
 				me.render_tiles(ctx.tiles || []);
-				if (!me.allowed.length) {
+				if (!me.allowed.length && !me.custom) {
 					$('.nh-right', me.$main).hide();
 					$('#nh-left').addClass('nh-full');
 				}
@@ -388,7 +396,8 @@ class NestHome {
 	}
 
 	build_list_sections() {
-		var html = this.allowed.map(function(cat) {
+		var cats = (this.custom ? ['L'] : []).concat(this.allowed || []);
+		var html = cats.map(function(cat) {
 			var m = NH_LIST_META[cat];
 			// My Activities (A) gets a filter + sort toolbar in its header.
 			var tools = (cat === 'A') ? [
@@ -436,6 +445,18 @@ class NestHome {
 			cats.forEach(function(cat) {
 				$('#nh-body-' + cat).html('<div class="nh-error">Could not load this list.</div>');
 			});
+		});
+	}
+
+	// List L: the layout's List Method answers rows in the attention item shape
+	// (title, date, deep_link as a route array or a /portal-page string).
+	load_custom() {
+		var me = this;
+		return frappe.call({ method: this.custom.method }).then(function(r) {
+			var m = r && r.message;
+			me.render_list('L', Array.isArray(m) ? m : ((m && m.items) || []));
+		}).catch(function() {
+			$('#nh-body-L').html('<div class="nh-error">Could not load this list.</div>');
 		});
 	}
 

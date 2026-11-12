@@ -167,3 +167,15 @@ role_home_page still covers managers. Record the answer here after smoke test.
   (nest-home) in `home_page`; `nest_home_redirect.js` wraps `pageview.show` so an empty route
   with a route landing goes straight to it (`frappe.set_route`). Page landings unchanged.
 - `__version__` -> 0.0.34 (redirect JS is an app_include asset, rebuilt by a fresh Deploy).
+
+## v0.0.35 - 2026-11-12: a layout's own list
+
+- `Nest Home Layout.list_method` + `list_title` (Data): when a method is set, the page shows that list
+  first (category `L`), filled by calling the method (any app's whitelisted function, no args). It
+  answers a list of attention items (`title`, `date`, `deep_link`; the row shows `owner_or_party` or
+  `title` plus the date) or `{"items": [...]}`. `deep_link` may be a route array or a portal path
+  string like `/po-approvals` (row clicks on a string now go through `open_route`). Refreshes with the
+  page and the 2-min poll. Untick A/B/C on the layout to make it the only list.
+- First use (comstruct): `nest_po_management.api.home_list` (nest_po_management 0.0.3) - POs waiting
+  on the user's approval + the user's own open requests, one list "Purchase Requests".
+- BUILD_MARKER -> `v0.0.35-2026-11-12-layout-list`; `__version__` -> 0.0.35.
