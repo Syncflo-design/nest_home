@@ -179,3 +179,15 @@ role_home_page still covers managers. Record the answer here after smoke test.
 - First use (comstruct): `nest_po_management.api.home_list` (nest_po_management 0.0.3) - POs waiting
   on the user's approval + the user's own open requests, one list "Purchase Requests".
 - BUILD_MARKER -> `v0.0.35-2026-11-12-layout-list`; `__version__` -> 0.0.35.
+
+## v0.0.36 - 2026-11-12: My Activities is the only built-in list
+
+- Russell: nest_home keeps only List A (My Activities). Lists B (Awaiting My Action, the draft
+  doc rules incl. nesterp presales invoices) and C (Waiting On Others) are removed from every site:
+  `attention/sources/awaiting.py` deleted, `todos.list_c` gone, layout checkboxes `show_list_b` /
+  `show_list_c` removed (DB columns stay, unused), no-layout default is List A for everyone.
+- Anything else on a dashboard comes from a layout's own list (`list_method`, v0.0.35), e.g. the
+  Com-Struct PO list from nest_po_management. The orphan child doctype `Nest Home Role List` still
+  carries B/C checkboxes; nothing reads it.
+- nesterp layouts Administrator, Administrator Profile and PreSales had only B+C on; set to My
+  Activities. BUILD_MARKER -> `v0.0.36-2026-11-12-my-activities-only`; `__version__` -> 0.0.36.

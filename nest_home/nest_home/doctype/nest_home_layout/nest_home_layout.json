@@ -8,7 +8,7 @@
  "field_order": [
   "layout_name", "enabled", "priority", "landing_route", "cb_top",
   "applies_to", "role_profile", "role",
-  "lists_section", "lists_help", "show_list_a", "show_list_b", "show_list_c", "list_title", "list_method",
+  "lists_section", "lists_help", "show_list_a", "list_title", "list_method",
   "greeting_section", "greeting",
   "tiles_section", "tiles_help", "tiles"
  ],
@@ -22,10 +22,8 @@
   {"fieldname": "role", "fieldtype": "Link", "label": "Role", "options": "Role", "depends_on": "eval:doc.applies_to=='Role'", "mandatory_depends_on": "eval:doc.applies_to=='Role'", "in_list_view": 1},
   {"fieldname": "role_profile", "fieldtype": "Link", "label": "Role Profile", "options": "Role Profile", "depends_on": "eval:doc.applies_to=='Role Profile'", "mandatory_depends_on": "eval:doc.applies_to=='Role Profile'", "in_list_view": 1},
   {"fieldname": "lists_section", "fieldtype": "Section Break", "label": "Lists Shown"},
-  {"fieldname": "lists_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Tick which attention lists this layout shows.</p>"},
-  {"fieldname": "show_list_a", "fieldtype": "Check", "label": "My Activities (List A)", "default": "1"},
-  {"fieldname": "show_list_b", "fieldtype": "Check", "label": "Awaiting My Action (List B)", "default": "0"},
-  {"fieldname": "show_list_c", "fieldtype": "Check", "label": "Waiting On Others (List C)", "default": "0"},
+  {"fieldname": "lists_help", "fieldtype": "HTML", "options": "<p class='text-muted'>Choose the lists this layout shows.</p>"},
+  {"fieldname": "show_list_a", "fieldtype": "Check", "label": "My Activities", "default": "1"},
   {"fieldname": "list_title", "fieldtype": "Data", "label": "Own List Title", "depends_on": "eval:doc.list_method", "description": "Heading for the list below, e.g. Purchase Requests."},
   {"fieldname": "list_method", "fieldtype": "Data", "label": "Own List Method (optional)", "description": "A whitelisted method that returns this list's rows, shown first, e.g. <code>nest_po_management.api.home_list</code>. Leave blank for none."},
   {"fieldname": "greeting_section", "fieldtype": "Section Break", "label": "Greeting"},

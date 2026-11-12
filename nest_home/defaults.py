@@ -114,8 +114,6 @@ def ensure_admin_layout():
             "role": "System Manager",
             "priority": 0,
             "show_list_a": 1,
-            "show_list_b": 1,
-            "show_list_c": 1,
             "greeting": "Here's what needs you today.",
             "tiles": tile_rows,
         }).insert(ignore_permissions=True)
@@ -180,7 +178,7 @@ def _resolve_tile_spec(spec, sort_order=0):
 def ensure_layout_for_profile(
     role_profile,
     tiles,
-    lists=("A", "B", "C"),
+    lists=("A",),
     greeting="Here's what needs you today.",
     priority=0,
     enabled=1,
@@ -196,7 +194,7 @@ def ensure_layout_for_profile(
 
     role_profile : name of an existing Role Profile (the layout's match key).
     tiles        : ordered list of tile specs (see _resolve_tile_spec).
-    lists        : subset of {"A","B","C"} the layout shows (default: all).
+    lists        : ("A",) shows My Activities, () shows no built-in list.
     greeting     : header greeting line.
     priority     : higher wins when a user matches more than one layout.
     enabled      : 0/1.
@@ -232,8 +230,6 @@ def ensure_layout_for_profile(
     doc.greeting = greeting
     lset = set(lists or ())
     doc.show_list_a = 1 if "A" in lset else 0
-    doc.show_list_b = 1 if "B" in lset else 0
-    doc.show_list_c = 1 if "C" in lset else 0
 
     if replace_tiles:
         doc.set("tiles", [])

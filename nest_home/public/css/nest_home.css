@@ -149,8 +149,7 @@
 .nh-list-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
 .nh-list-title .nh-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .nh-dot-A { background: var(--nh-primary); }
-.nh-dot-B { background: var(--warning-color, #c4a373); }
-.nh-dot-C { background: var(--nh-accent); }
+.nh-dot-L { background: var(--warning-color, #c4a373); }
 .nh-list-sub { font-size: 11px; color: var(--nh-muted); font-weight: 500; margin-top: 1px; }
 .nh-count {
   min-width: 26px; height: 24px; padding: 0 8px; border-radius: 12px;

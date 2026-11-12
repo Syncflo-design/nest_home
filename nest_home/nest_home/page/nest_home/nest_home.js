@@ -14,7 +14,7 @@ frappe.pages['nest-home'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	var BUILD_MARKER = 'v0.0.35-2026-11-12-layout-list';
+	var BUILD_MARKER = 'v0.0.36-2026-11-12-my-activities-only';
 	console.log('Nest Home loaded:', BUILD_MARKER);
 
 	// Load page styles from the separate CSS file (keeps this JS well under the
@@ -48,11 +48,7 @@ frappe.pages['nest-home'].on_page_show = function(wrapper) {
 
 var NH_LIST_META = {
 	A: { title: 'My Activities',      sub: 'Do these',     dot: 'nh-dot-A',
-	     empty_title: "You're all clear", empty_msg: 'No activities need you right now.' },
-	B: { title: 'Awaiting My Action', sub: 'Your call',    dot: 'nh-dot-B',
-	     empty_title: 'Nothing awaiting you', empty_msg: 'No drafts are waiting on your decision.' },
-	C: { title: 'Waiting On Others',  sub: 'Chase these',  dot: 'nh-dot-C',
-	     empty_title: 'Nothing outstanding', empty_msg: "No one owes you anything right now." }
+	     empty_title: "You're all clear", empty_msg: 'No activities need you right now.' }
 };
 
 // Due-date rendering for a condensed row. Returns formatted text + overdue flag.
@@ -279,7 +275,7 @@ class NestHome {
 		var me = this;
 		this.load_context().then(function() {
 			me.build_list_sections();
-			me.load_visible();      // List A paints first; B/C fill behind it.
+			me.load_visible();      // the layout list and My Activities.
 			me.start_poll();
 		});
 	}
@@ -304,7 +300,7 @@ class NestHome {
 				// The layout's own list (from another app's method) shows first, as list L.
 				me.custom = (ctx.custom_list && ctx.custom_list.method) ? ctx.custom_list : null;
 				if (me.custom) {
-					NH_LIST_META.L = { title: frappe.utils.escape_html(me.custom.title), sub: '', dot: 'nh-dot-B',
+					NH_LIST_META.L = { title: frappe.utils.escape_html(me.custom.title), sub: '', dot: 'nh-dot-L',
 						empty_title: 'Nothing waiting', empty_msg: 'Nothing needs you right now.' };
 				}
 				me.render_header(ctx);

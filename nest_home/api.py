@@ -1,9 +1,9 @@
 """nest_home public API — the attention engine entrypoints called by the page.
 
 Design promises honoured here:
-  * Performance — bounded queries (limit per source), one pass per category.
-    The page calls get_attention(["A"]) first so List A paints instantly, then
-    get_attention(["B","C"]) to fill the rest behind it.
+  * Performance — bounded queries (limit per source). The only built-in list is
+    List A (My Activities); since v0.0.36 the old Lists B and C are gone, and a
+    layout can add its own list from another app (list_method).
   * Every whitelisted method returns a TRUTHY payload, so the client-side
     success branch (`if (r.message)`) always fires. See CoWork_Helper gotcha
     2026-05-13 (whitelisted-action-needs-return-value).
@@ -12,23 +12,16 @@ Role-based views (v0.0.3): a "Nest Home Layout" record decides which lists and
 which quick-launch buttons a user sees. Resolution order:
     1. a layout attached to the user's Role Profile
     2. a layout attached to one of the user's Roles
-    3. no layout  -> sensible defaults (managers A+B+C, everyone else A)
+    3. no layout  -> List A
 Highest `priority` wins inside each step.
 """
 
 import json
 import frappe
 
-from nest_home.attention.sources import todos, awaiting
+from nest_home.attention.sources import todos
 
-# Roles that see the full A+B+C management board when NO layout matches the
-# user. Everyone else defaults to List A only.
-_DEFAULT_MANAGER_ROLES = {
-    "System Manager", "Sales Manager", "Purchase Manager",
-    "Stock Manager", "Manufacturing Manager", "Accounts Manager",
-}
-
-_VALID_CATEGORIES = ("A", "B", "C")
+_VALID_CATEGORIES = ("A",)
 
 
 # ---------------------------------------------------------------------------
@@ -139,24 +132,12 @@ def user_has_layout(user=None):
 
 
 def lists_for_user(user=None):
-    """Which categories this user should see. A matching layout decides;
-    otherwise managers default to A+B+C and everyone else to List A."""
+    """Which built-in lists this user sees: List A, unless their layout switches
+    it off (a layout with it off means exactly that: no built-in list)."""
     user = user or frappe.session.user
     layout = resolve_layout(user)
-    if layout:
-        mapped = set()
-        if getattr(layout, "show_list_a", 0):
-            mapped.add("A")
-        if getattr(layout, "show_list_b", 0):
-            mapped.add("B")
-        if getattr(layout, "show_list_c", 0):
-            mapped.add("C")
-        # A layout with every list switched off means exactly that: no lists.
-        return [c for c in _VALID_CATEGORIES if c in mapped]
-
-    # No layout -> sensible defaults.
-    if _user_roles(user) & _DEFAULT_MANAGER_ROLES:
-        return ["A", "B", "C"]
+    if layout and not getattr(layout, "show_list_a", 0):
+        return []
     return ["A"]
 
 
@@ -265,21 +246,17 @@ def _show_nest_credit(s):
 def get_attention(categories=None, limit_per=20):
     """Return normalised attention items for the requested categories.
 
-    categories: list/JSON-string subset of ["A","B","C"]; defaults to all the
-    current user is entitled to. limit_per bounds each source."""
+    categories: list/JSON-string subset of ["A"]; defaults to all the current
+    user is entitled to. limit_per bounds each source."""
     user = frappe.session.user
     limit_per = int(limit_per or 20)
     requested = _coerce_categories(categories)
     allowed = set(lists_for_user(user))
     cats = [c for c in requested if c in allowed]
 
-    result = {"user": user, "A": [], "B": [], "C": [], "counts": {}}
+    result = {"user": user, "A": [], "counts": {}}
     if "A" in cats:
         result["A"] = todos.list_a(user, limit_per)
-    if "C" in cats:
-        result["C"] = todos.list_c(user, limit_per)
-    if "B" in cats:
-        result["B"] = awaiting.list_b(user, limit_per)
 
     result["counts"] = {k: len(result[k]) for k in _VALID_CATEGORIES}
     result["allowed_lists"] = sorted(allowed)
@@ -341,7 +318,7 @@ def build_profile_view(role_profile, tiles, lists=None, greeting=None, priority=
         return v
 
     tiles = _maybe_json(tiles) or []
-    lists = _maybe_json(lists) or ["A", "B", "C"]
+    lists = _maybe_json(lists) or ["A"]
     kwargs = {"tiles": tiles, "lists": lists, "priority": int(priority or 0)}
     if greeting:
         kwargs["greeting"] = greeting

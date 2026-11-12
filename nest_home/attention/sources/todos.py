@@ -1,8 +1,6 @@
-"""List A (My Activities) and List C (Waiting On Others) — both from the ToDo
-table, different filters. A and C are nearly free: one bounded query each.
+"""List A (My Activities) from the ToDo table: one bounded query.
 
 List A: ToDos allocated to me, Open                 → "do these".
-List C: ToDos I assigned to others (not me), Open   → "chase these".
 
 Lead/Customer-linked ToDos are the primary signal for sales/presales seats, so
 those rows are enriched: the raw reference (CRM-LEAD-0007) is resolved to the
@@ -150,27 +148,5 @@ def list_a(user, limit=20):
     has_hub = _party_hub_available()
     return [
         _todo_item(t, "A", "From", t.get("assigned_by") or t.get("owner"), lookups, has_hub)
-        for t in rows
-    ]
-
-
-def list_c(user, limit=20):
-    """List C — ToDos I assigned to OTHERS (not myself), still Open. 'Chase these.'"""
-    rows = frappe.get_list(
-        "ToDo",
-        filters=[
-            ["assigned_by", "=", user],
-            ["allocated_to", "!=", user],
-            ["status", "=", "Open"],
-        ],
-        fields=_TODO_FIELDS,
-        order_by="date asc, modified desc",
-        limit_page_length=limit,
-        ignore_permissions=True,  # I assigned them, so I'm allowed to track them
-    )
-    lookups = _build_party_lookups(rows)
-    has_hub = _party_hub_available()
-    return [
-        _todo_item(t, "C", "Waiting on", t.get("allocated_to"), lookups, has_hub)
         for t in rows
     ]
