@@ -214,3 +214,18 @@ role_home_page still covers managers. Record the answer here after smoke test.
   page hides the desk page-head, so the button never shows there. Styles are injected once
   (`#nest-home-btn-style`); no CSS bundle. Replaced an uncommitted sidebar "Home" item.
 - `__version__` -> 0.0.38. BUILD_MARKER unchanged (page bundle not touched).
+
+## v0.0.39 - 2026-11-12: Home button solid green
+
+- Russell: make the header Home button solid green so it reads as the main home button.
+  Background `--green-600` (hover `--green-700`), Frappe's own scale so light and dark both
+  work, white house icon. `__version__` -> 0.0.39.
+- Header Home button missing for users after the 0.0.38 deploy: `/assets/<app>/js/*.js` is served
+  `Cache-Control: max-age=31536000, immutable` under an unchanging URL, so browsers kept the
+  pre-button copy. The redirect script is now `public/js/nest_home_redirect.bundle.js`,
+  included as `app_include_js = ["nest_home_redirect.bundle.js"]`; the build gives it a hashed
+  URL, so every Deploy reaches every browser without a hard refresh (same as nest_assistant).
+- Checked on nesterp 2026-11-12: button on list, report view, kanban, calendar, image, dashboard
+  view, tree, form (new/saved), Customize Form, query reports, print view, POS, permission
+  manager, my-activities, party-activity and every workspace. Not on Frappe CRM / Helpdesk /
+  Drive / Builder: separate apps with no desk page head.

@@ -91,9 +91,9 @@ frappe.provide("nest_home");
 		$("<style id='nest-home-btn-style'></style>").text([
 			".page-title ." + CLS + "{display:flex;align-items:center;justify-content:center;",
 			"flex-shrink:0;width:28px;height:28px;margin-right:var(--margin-sm);",
-			"border-radius:var(--border-radius-md);cursor:pointer;--icon-stroke:var(--gray-700)}",
-			".page-title ." + CLS + ":hover{background:var(--fg-hover-color)}",
-			"[data-theme=dark] .page-title ." + CLS + "{--icon-stroke:var(--gray-300)}"
+			"border-radius:var(--border-radius-md);cursor:pointer;",
+			"background:var(--green-600,#268c5c);--icon-stroke:#fff}",
+			".page-title ." + CLS + ":hover{background:var(--green-700,#14804d)}"
 		].join("")).appendTo("head");
 	}
 

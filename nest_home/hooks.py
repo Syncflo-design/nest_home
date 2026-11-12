@@ -65,8 +65,11 @@ fixtures = [
     },
 ]
 
-# No global desk bundle — the page loads its own CSS via a <link> tag.
-app_include_js  = ["/assets/nest_home/js/nest_home_redirect.js"]
+# Landing redirect + header Home button, on every desk page. A .bundle.js so the
+# build gives it a hashed URL: plain /assets files are served "immutable" for a
+# year, so browsers kept the old copy after a deploy. The nest-home page loads
+# its own CSS via a <link> tag.
+app_include_js  = ["nest_home_redirect.bundle.js"]
 app_include_css = []
 
 # ---------------------------------------------------------------------------
